@@ -1,6 +1,7 @@
 get_certificate(){
     echo | openssl s_client -showcerts -servername $1 -connect $1:443 2>/dev/null | openssl x509 -inform pem -noout -text
 }
+
 get_certificate_nuclei(){
     input=""
     while read line && [[ "$line" != "END_OF_INPUT" ]]; do
@@ -8,12 +9,15 @@ get_certificate_nuclei(){
     done
     echo $input | nuclei -t ~/ssl.yaml -silent -j | jq -r '.["extracted-results"][]'
 }
+
 abuse_ip(){
     curl -s "https://www.abuseipdb.com/whois/$1" -H "user-agent: Chrome" | grep -E '<li>\w.*</li>' | sed -E 's/<\/?li>//g' | sed -e "s/$/.$1/"
 }
+
 get_asn(){
 	curl -s https://api.bgpview.io/ip/$1 | jq -r ".data.prefixes[] | {prefix: .prefix, ASN: .asn.asn}"
 }
+
 httpx_full(){
     input=""
     while read line && [[ "$line" != "END_OF_INPUT" ]]; do
@@ -21,6 +25,7 @@ httpx_full(){
     done
     echo $input | httpx -silent -follow-host-redirects -title -status-code -cdn -tech-detect -H "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:108.0) Gecko/20100101 Firefox/108.0" -H "Referer: https://$input" -threads 1
 }
+
 httpx_full_silent(){
     input=""
     while read line && [[ "$line" != "END_OF_INPUT" ]]; do
@@ -28,6 +33,7 @@ httpx_full_silent(){
     done
     echo $input | httpx -silent -H "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:108.0) Gecko/20100101 Firefox/108.0" -H "Referer: https://$input" -threads 1
 }
+
 nice_naabu(){
     input=""
     while read line && [[ "$line" != "END_OF_INPUT" ]]; do
@@ -35,9 +41,11 @@ nice_naabu(){
     done
     echo $input | naabu -p 3868,3366,8443,8080,9443,9091,3000,8000,5900,8081,6000,10000,8181,3306,5000,4000,8888,5432,15672,9999,161,4044,7077,4040,9000,8089,443,7447,7080,8880,8983,5673,7443,80,2052,2082,2086,2095,2053,2083,2087,2096,10443 -silent
 }
+
 nice_masscan(){
     masscan $1 --open --ports 80,443,444,1443,1455,2000,2020,2052,2053,2082,2083,2086,2087,2095,2096,2222,3000,3003,3030,3300,3306,3333,4000,4040,4400,4440,4443,4444,4900,5000,5030,5050,5432,5500,5555,6000,6100,6666,7000,7007,7008,7700,7777,8000,8080,8090,8100,8180,8200,8300,8400,8443,8500,8600,8700,8800,8880,8888,8899,9000,9009,9040,9050,9080,9090,9100,9200,9300,9400,9500,9898,9900,9999,10443,27017 -oL masscan-res.txt && grep "open" masscan-res.txt | awk '{print $4 ":" $3}'
 }
+
 getptr(){
     input=""
     while read line && [[ "$line" != "END_OF_INPUT" ]]; do
@@ -45,6 +53,7 @@ getptr(){
     done
     echo $input | dnsx -silent -resp-only -ptr
 }
+
 crtsh(){
     query=$(cat <<-END
         SELECT
@@ -57,11 +66,13 @@ END
 )
     echo "$query" | psql -t -h crt.sh -p 5432 -U guest certwatch | sed 's/ //g' | egrep ".*.\.$1" | sed 's/*\.//g' | tr '[:upper:]' '[:lower:]' | sort -u
 }
+
 github_scan(){
     DOMAIN=$1
     q=$(echo $DOMAIN | sed -e 's/\./\\\./g')
     src search -json '([a-z\-]+)?:?(\/\/)?([a-zA-Z0-9]+[.])+('${q}') count:5000 fork:yes archived:yes' | jq -r '.Results[] | .lineMatches[].preview, .file.path' | grep -oiE '([a-zA-Z0-9]+[.])+('${q}')' | awk '{ print tolower($0) }' | sort -u
 }
+
 get_subs () {
 	domain=$1
 	crtsh $domain | grep -v "*" | sort -u > ${domain}.subs
@@ -70,6 +81,7 @@ get_subs () {
 	echo "[abuseipdb]"
 	abuseipdb $domain | anew ${domain}.subs
 }
+
 get_ip_asn () {
 	input=""
 	while read line
@@ -77,6 +89,7 @@ get_ip_asn () {
 		curl -s https://api.bgpview.io/ip/$line | jq -r ".data.prefixes[0].asn.asn"
 	done < "${1:-/dev/stdin}"
 }
+
 get_asn_details () {
 	input=""
 	while read line
@@ -84,6 +97,7 @@ get_asn_details () {
 		curl -s https://api.bgpview.io/asn/$line/prefixes | jq -r ".data.ipv4_prefixes[0] | {prefix: .prefix, name: .description}"
 	done < "${1:-/dev/stdin}"
 }
+
 nice_masscan_list () {
 	masscan -iL $1 --open --ports 80,443,444,1443,1455,2000,2020,2052,2053,2082,2083,2086,2087,2095,2096,2222,3000,3003,3030,3300,3306,3333,4000,4040,4400,4440,4443,4444,4900,5000,5030,5050,5432,5500,5555,6000,6100,6666,7000,7007,7008,7700,7777,8000,8080,8090,8100,8180,8200,8300,8400,8443,8500,8600,8700,8800,8880,8888,8899,9000,9009,9040,9050,9080,9090,9100,9200,9300,9400,9500,9898,9900,9999,10443,27017 -oL masscan-res.txt && grep "open" masscan-res.txt | awk '{print $4 ":" $3}'
 }
