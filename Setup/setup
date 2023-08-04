@@ -1,0 +1,1572 @@
+#!/bin/bash
+
+#check run as root
+if [[ $EUID -ne 0 ]]; then
+   echo -e "\e[1;91m [!] Run this program as root \e[0m"
+   exit 1
+fi
+
+# ------------------------------------------------< ALL ARGUMENTS >-----------------------------------------------
+# xtrace mode (DEBUG) -d 
+debug() {
+    set -x
+}
+# ------------------------------------------------</ALL ARGUMENTS >-----------------------------------------------
+
+# ------------------------------------------------< ALL VARIABLE >------------------------------------------------
+#variable
+HOME=$HOME
+DATE=$(date)
+discord_webhook() {
+    if [[ -e "${HOME}/Hunt/Setup/.webhook" ]]; then
+        WEBHOOK_URL=$(cat ${HOME}/Hunt/Setup/.webhook)
+    else
+        echo
+        read -p "Enter your Discord Webhook : " WEBHOOK_URL
+        echo -e "$WEBHOOK_URL" > ${HOME}/Hunt/Setup/.webhook
+    fi
+}
+#colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+BLUE2='\033[0;94m'
+MAGENTA='\033[0;35m'
+CYAN='\033[0;36m'
+DARK_GRAY='\033[0;90m'
+NC='\033[0m'
+# ------------------------------------------------</ALL VARIABLE >------------------------------------------------
+
+# -------------------------------------------------< ALL BANNER >-------------------------------------------------
+#installing banner
+install_banner() {
+    name=$1
+    echo -e "\n${DARK_GRAY}#############################################${NC}"
+    echo -e "${GREEN}[+] Installing $name ${NC}"
+}
+
+#installing tool banner
+installtool_banner() {
+    name=$1
+    echo -e "\n${DARK_GRAY}######################################${NC}"
+    echo -e "${MAGENTA}[+] Installing $name Tool${NC}\n"
+}
+
+#updating banner
+update_banner() {
+    name=$1
+    echo -e "\n${DARK_GRAY}#############################################${NC}"
+    echo -e "${BLUE}[~] Updating $name ${NC}"
+}
+
+#updating tool banner
+updatetool_banner() {
+    name=$1
+    echo -e "\n${DARK_GRAY}######################################${NC}"
+    echo -e "${BLUE2}[~] Updating $name Tool${NC}\n"
+}
+
+#configing banner
+config_banner() {
+    name=$1
+    echo -e "\n${DARK_GRAY}######################################${NC}"
+    echo -e "${CYAN}[|] Configing $name ${NC}\n"
+}
+
+#zigax head banner
+zigax_hbanner() {
+    clear -x
+    echo -e " ${DARK_GRAY}         _         
+         (_)                          
+     ____ _      __ _   __ _ __  __   
+    |_  /| |    / _\` | / _\` |\ \/ /   
+     / / | |   | (_| || (_| | >  <    
+    /___||_|    \__, | \__,_|/_/\_\   
+         ______  __/ |   __  _        
+        |______||___/   / _|(_)       
+      ___  ___   _ __  | |_  _   __ _ 
+     / __|/ _ \ | '_ \ |  _|| | / _\` |
+    | (__| (_) || | | || |  | || (_| |
+     \___|\___/ |_| |_||_|  |_| \__, |
+                                 __/ |
+            GitHub : zi-gax     |___/ ${NC}"
+}
+
+#auto update head banner
+auto_hbanner() {
+    clear -x
+    echo -e " ${DARK_GRAY}         _         
+         (_)                          
+     ____ _      __ _   __ _ __  __   
+    |_  /| |    / _\` | / _\` |\ \/ /   
+     / / | |   | (_| || (_| | >  <    
+    /___||_|    \__, | \__,_|/_/\_\   
+         ______  __/ |   __  _        
+        |______||___/   / _|(_)       
+      ___  ___   _ __  | |_  _   __ _ 
+     / __|/ _ \ | '_ \ |  _|| | / _\` |
+    | (__| (_) || | | || |  | || (_| |
+     \___|\___/ |_| |_||_|  |_| \__, |
+                                 __/ |
+          All-Auto Configing    |___/ ${NC}"
+}
+
+#manually update head banner
+manual_hbanner() {
+    clear -x
+    echo -e " ${DARK_GRAY}         _         
+         (_)                          
+     ____ _      __ _   __ _ __  __   
+    |_  /| |    / _\` | / _\` |\ \/ /   
+     / / | |   | (_| || (_| | >  <    
+    /___||_|    \__, | \__,_|/_/\_\   
+         ______  __/ |   __  _        
+        |______||___/   / _|(_)       
+      ___  ___   _ __  | |_  _   __ _ 
+     / __|/ _ \ | '_ \ |  _|| | / _\` |
+    | (__| (_) || | | || |  | || (_| |
+     \___|\___/ |_| |_||_|  |_| \__, |
+                                 __/ |
+          Manually Configing    |___/ ${NC}"
+}
+
+#update tools head banner
+update_hbanner() {
+    clear -x
+    echo -e " ${DARK_GRAY}         _         
+         (_)                          
+     ____ _      __ _   __ _ __  __   
+    |_  /| |    / _\` | / _\` |\ \/ /   
+     / / | |   | (_| || (_| | >  <    
+    /___||_|    \__, | \__,_|/_/\_\   
+         ______  __/ |   __  _        
+        |______||___/   / _|(_)       
+      ___  ___   _ __  | |_  _   __ _ 
+     / __|/ _ \ | '_ \ |  _|| | / _\` |
+    | (__| (_) || | | || |  | || (_| |
+     \___|\___/ |_| |_||_|  |_| \__, |
+                                 __/ |
+            Updating Tools      |___/ ${NC}"
+}
+
+#change dns head banner
+dns_hbanner() {
+    clear -x
+    echo -e " ${DARK_GRAY}         _         
+         (_)                          
+     ____ _      __ _   __ _ __  __   
+    |_  /| |    / _\` | / _\` |\ \/ /   
+     / / | |   | (_| || (_| | >  <    
+    /___||_|    \__, | \__,_|/_/\_\   
+         ______  __/ |   __  _        
+        |______||___/   / _|(_)       
+      ___  ___   _ __  | |_  _   __ _ 
+     / __|/ _ \ | '_ \ |  _|| | / _\` |
+    | (__| (_) || | | || |  | || (_| |
+     \___|\___/ |_| |_||_|  |_| \__, |
+                                 __/ |
+             Changing Dns       |___/ ${NC}"
+}
+
+#auto update done banner
+bauto_log() {
+    echo -e "\n${YELLOW}########################################${NC}"
+    echo -e "${YELLOW}#    All-Auto Configing Server Done!   #${NC}"
+    echo -e "${YELLOW}# LogFile /var/log/AC-zi$(date +"-%B-%0d").log #${NC}"
+    echo -e "${YELLOW}########################################${NC}"
+}
+
+#manually update done banner
+bManual_log() {
+    echo -e "\n${YELLOW}########################################${NC}"
+    echo -e "${YELLOW}#    Manually Configing Server Done!   #${NC}"
+    echo -e "${YELLOW}# LogFile /var/log/MC-zi$(date +"-%B-%0d").log #${NC}"
+    echo -e "${YELLOW}#######################################${NC}"
+}
+
+#update tools done banner
+bUpdate_log() {
+    echo -e "\n${YELLOW}########################################${NC}"
+    echo -e "${YELLOW}#         Updating Tools Done!         #${NC}"
+    echo -e "${YELLOW}# LogFile /var/log/UT-zi$(date +"-%B-%0d").log #${NC}"
+    echo -e "${YELLOW}########################################${NC}"
+}
+
+#save error log banner
+error_check () {
+    echo -e "${RED}   *** You Can Check Setup log! ***     ${NC}"
+    echo -e "    /var/log/Setup-zi$(date +"-%B-%0d").log"
+}
+# --------------------------------------------------</ALL BANNER>--------------------------------------------------
+
+# --------------------------------------------------< OS CHECK >--------------------------------------------------
+if [[ -f /etc/os-release ]]; then
+    source /etc/os-release
+    release=$ID
+elif [[ -f /usr/lib/os-release ]]; then
+    source /usr/lib/os-release
+    release=$ID
+else
+    echo "${YELLOW}[!] Failed to check the system OS " >&2
+    exit 1
+fi
+
+hardware_name() {
+    case "$(uname -m)" in
+    x86_64 | x64 | amd64) echo 'amd64' ;;
+    armv8 | arm64 | aarch64) echo 'arm64' ;;
+    *) echo -e "${RED}[!] Unsupported CPU architecture ${NC}" && exit 1 ;;
+    esac
+}
+echo -e "${DARK_GRAY}  *** OS-Release : $release $(hardware_name) ***${NC}"
+
+os_version=""
+os_version=$(grep -i version_id /etc/os-release | cut -d \" -f2 | cut -d . -f1)
+
+if [[ "${release}" == "ubuntu" ]]; then
+    if [[ ${os_version} -lt 20 ]]; then
+        echo -e "${RED}[!] please use Ubuntu 20 or higher version ${NC}\n" && exit 1
+    fi
+
+elif [[ "${release}" == "fedora" ]]; then
+    if [[ ${os_version} -lt 36 ]]; then
+        echo -e "${RED}[!] please use Fedora 36 or higher version ${NC}\n" && exit 1
+    fi
+
+elif [[ "${release}" == "debian" ]]; then
+    if [[ ${os_version} -lt 10 ]]; then
+        echo -e "${RED}[!] Please use Debian 10 or higher version ${NC}\n" && exit 1
+    fi
+elif [[ "${release}" == "arch" ]]; then
+    echo 
+else
+    echo -e "${YELLOW}[!] Failed to check the OS version ${NC}" && exit 1
+fi
+# --------------------------------------------------</OS CHECK >--------------------------------------------------
+
+# --------------------------------------------------< OS CONFIG >--------------------------------------------------
+#updating linux
+update_linux() {
+    update_banner "linux"
+    case "${release}" in
+    fedora)
+        yum -y -q update && yum -y -q upgrade 
+        ;;
+    arch)
+        pacman -Syyu 
+        ;;
+    *)
+        apt-get -y -q update && apt-get -y -q upgrade && apt-get autoremove -y
+        ;;
+    esac
+}
+
+#install Default Tools
+install_defaulttools() {
+    install_banner "Default Tools"
+    case "${release}" in
+    fedora)
+        yum install -y -q which vim wget procps-ng powerline-fonts rust cargo curl libpcap-devel git net-tools tmux make gcc gcc-c++ python3 python3-pip python3-devel openssl rust-libudev-devel libudev-devel openssl-devel jq nano pkg-config ncurses which util-linux-ng util-linux-user
+        ;;
+    arch)
+        pacman -S --noconfirm vim wget procps-ng powerline powerline-fonts rust curl libpcap git net-tools tmux base-devel make python python-pip openssl jq nano npm
+        ;;
+    *)
+        apt install -y -q vim wget fonts-powerline rustc cargo curl libpcap-dev git net-tools tmux build-essential make python3 python3-pip python3-apt python3-distutils libssl-dev pkg-config jq nano npm debianutils passwd
+        ;;
+    esac
+}
+
+#install zsh + oh my zsh 
+install_omz() {
+    if [[ "$(which zsh)" != "/usr/bin/zsh" ]]; then
+        install_banner "zsh + oh-my-zsh"
+        case "${release}" in
+        fedora)
+            yum install -y -q zsh
+            ;;
+        arch)
+            pacman -S --noconfirm zsh
+            ;;
+        *)
+            apt-get install -y -q zsh
+            ;;
+        esac
+        bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+        exit 0
+    else
+        echo -e "${YELLOW}[!] Zsh is installed !"
+    fi
+}
+
+#changing dns resolvers to Cloudflare 
+dns_cloud() {
+    config_banner "Dns resolver (Cloudflare)"
+    bash -c 'echo -e "nameserver 1.1.1.1\nnameserver 1.0.0.1" > /etc/resolv.conf'
+}
+
+#changing dns resolvers to Quad9
+dns_Quad9() {
+    config_banner "Dns resolver (Quad9)"
+    bash -c 'echo -e "nameserver 9.9.9.9\nnameserver 149.112.112.112" > /etc/resolv.conf'
+}
+
+#changing dns resolvers to shkan
+dns_shekan() {
+    config_banner "Dns resolver (Shekan)"
+    bash -c 'echo -e "nameserver 178.22.122.100\nnameserver 185.51.200.2" > /etc/resolv.conf'
+}
+
+#changing dns resolvers to google
+dns_google() {
+    config_banner "Dns resolver (Google)"
+    bash -c 'echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /etc/resolv.conf'
+}
+
+#backup dns resolvers default
+dns_baks() {
+    config_banner "Dns resolver (Backup old)"
+    rm -rf /etc/resolv.conf-zibak
+    cp /etc/resolv.conf /etc/resolv.conf-zibak 
+}
+
+#changing dns resolvers to default
+dns_default() {
+    config_banner "Dns resolver (Default)"
+    cat /etc/resolv.conf-zibak | tee /etc/resolv.conf > /dev/null
+}
+# --------------------------------------------------</OS CONFIG >--------------------------------------------------
+
+# --------------------------------------------< PROGRAMMING LANGUAGE >---------------------------------------------
+#installing golang
+install_go() {
+    install_banner "Golang"
+    bash -c 'wget "https://go.dev/dl/$(curl https://go.dev/VERSION?m=text).linux-amd64.tar.gz"'
+    bash -c 'rm -rf /usr/local/go /usr/bin/go && tar -C /usr/local -xzf $(curl https://go.dev/VERSION?m=text).linux-amd64.tar.gz'
+    export PATH=$PATH:/usr/local/go/bin
+    export GOPROXY=https://goproxy.io
+    cp -r /usr/local/go /usr/bin/go
+    bash -c 'rm -rf $(curl https://go.dev/VERSION?m=text).linux-amd64.tar.gz'
+}
+
+#updating golang
+u_go() {
+    updatetool_banner "Golang"
+    if [[ -e "/usr/local/go/bin/go" ]]; then
+        go_release=$(cat /tmp/gor)
+        go_version=$(cat /tmp/gov)
+        if [[ "$go_version" != "$go_release" ]]; then
+            dns_shekan
+            bash -c 'wget "https://go.dev/dl/$(curl https://go.dev/VERSION?m=text).linux-amd64.tar.gz"'
+            bash -c 'rm -rf /usr/local/go /usr/bin/go && tar -C /usr/local -xzf $(curl https://go.dev/VERSION?m=text).linux-amd64.tar.gz'
+            export PATH=$PATH:/usr/local/go/bin
+            export GOPROXY=https://goproxy.io
+            bash -c 'rm -rf $(curl https://go.dev/VERSION?m=text).linux-amd64.tar.gz'
+        else
+            echo -e "\n${YELLOW}[!] Golang is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] Go does not exist ${NC}"
+    fi
+}
+
+#updating programming language
+update_programminglanguage() {
+    update_banner "Programming Languages"
+    u_go
+}
+# --------------------------------------------</PROGRAMMING LANGUAGE >---------------------------------------------
+
+# -------------------------------------------------< WORDLISTS >---------------------------------------------------
+#install wordlist
+install_wordlist() {
+    install_banner "WordList"
+    mkdir -p ${HOME}/Hunt/WordLists
+    cd ${HOME}/Hunt/WordLists && git clone https://github.com/danielmiessler/SecLists.git && git clone  https://github.com/trickest/resolvers.git
+}
+
+#update wordlist 
+update_wordlist() {
+    updatetool_banner "Wordlist(Github)"
+    #seclist
+    if [[ -e "${HOME}/Hunt/WordLists/SecLists" ]]; then
+        cd ${HOME}/Hunt/WordLists/SecLists && git pull
+    else
+        echo -e "\n${RED}[!] SecLists does not exist ${NC}"
+    fi
+    if [[ -e "${HOME}/Hunt/WordLists/resolvers" ]]; then
+        cd ${HOME}/Hunt/WordLists/resolvers && git pull
+    else
+        echo -e "\n${RED}[!] resolvers does not exist ${NC}"
+    fi
+}
+# -------------------------------------------------</WORDLISTS >---------------------------------------------------
+
+# --------------------------------------------< SUB DISCOVERY TOOLS >----------------------------------------------
+#install subfinder
+i_subfinder() {
+    installtool_banner "Subfinder"
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Subdomain/subfinder
+    go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+}
+
+#update subfinder
+u_subfinder() {
+    updatetool_banner "Subfinder"
+    if [[ -e "/usr/bin/subfinder" ]]; then
+        subfinder_release=$(cat /tmp/subfinderr)
+        subfinder_version=$(cat /tmp/subfinderv)
+        if [[ "$subfinder_version" != "$subfinder_release" ]]; then
+            go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+        else
+            echo -e "\n${YELLOW}[!] Subfinder is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] Subfinder does not exist ${NC}"
+    fi
+}
+
+#install httpx
+i_httpx() {
+    installtool_banner "Httpx"
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Subdomain/httpx
+    go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
+}
+
+#update httpx
+u_httpx() {
+    updatetool_banner "Httpx"
+    if [[ -e "/usr/bin/httpx" ]]; then
+        httpx_release=$(cat /tmp/httpxr)
+        httpx_version=$(cat /tmp/httpxv)
+        if [[ "$httpx_version" != "$httpx_release" ]]; then
+            go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
+        else
+            echo -e "\n${YELLOW}[!] Httpx is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] Httpx does not exist ${NC}"
+    fi
+}
+
+#install amass
+i_amass() {
+    installtool_banner "Amass"
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Subdomain/amass
+    go install -v github.com/owasp-amass/amass/v4/...@master
+}
+
+#update amass
+u_amass() {
+    updatetool_banner "Amass"
+    if [[ -e "/usr/bin/amass" ]]; then
+        amass_release=$(cat /tmp/amassr)
+        amass_version=$(cat /tmp/amassv)
+        if [[ "$amass_version" != "$amass_release" ]]; then
+            go install -v github.com/owasp-amass/amass/v4/...@master
+        else
+            echo -e "\n${YELLOW}[!] Amass is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] Amass does not exist ${NC}"
+    fi
+}
+
+#installing Subdomain Discovery Tools
+install_subdomaindiscoverytools() {
+    install_banner "Subdomain Discovery Tools"
+    i_subfinder
+    i_httpx
+    i_amass 
+}
+
+#updating Subdomain Discovery Tools
+update_subdomaindiscoverytools() {
+    update_banner "Subdomain Discovery Tools"
+    u_subfinder
+    u_httpx
+    u_amass 
+}
+# --------------------------------------------</SUB DISCOVERY TOOLS >----------------------------------------------
+
+# --------------------------------------------< PORT SCANNER TOOLS >-----------------------------------------------
+#install naabu
+i_naabu() {
+    installtool_banner "Naabu"
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Port/naabu
+    go install -v github.com/projectdiscovery/naabu/v2/cmd/naabu@latest
+}
+
+#update naabu
+u_naabu() {
+    updatetool_banner "Naabu"
+    if [[ -e "/usr/bin/naabu" ]]; then
+        naabu_release=$(cat /tmp/naabur)
+        naabu_version="v"$(cat /tmp/naabuv)
+        if [[ "$naabu_version" != "$naabu_release" ]]; then
+            go install -v github.com/projectdiscovery/naabu/v2/cmd/naabu@latest
+        else
+            echo -e "\n${YELLOW}[!] Naabu is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] Naabu does not exist ${NC}"
+    fi
+}
+
+#installing Port Scanner Tools
+install_portscannertools() {
+    install_banner "Port Scanner Tools"
+    i_naabu
+}
+
+#updating Port Scanner Tools
+update_portscannertools() {
+    update_banner "Port Scanner Tools"
+    u_naabu
+}
+# --------------------------------------------</PORT SCANNER TOOLS >-----------------------------------------------
+
+# ------------------------------------------< CONTENT DISCOVERY TOOLS >--------------------------------------------
+#install gospider
+i_gospider() {
+    installtool_banner "Gospider"
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Content/gospider
+    GO111MODULE=on go install github.com/jaeles-project/gospider@latest
+}
+
+#update gospider
+u_gospider() {
+    updatetool_banner "Gospider"
+    if [[ -e "/usr/bin/gospider" ]]; then
+        gospider_release=$(cat /tmp/gospiderr)
+        gospider_version=$(cat /tmp/gospiderv)
+        if [[ "$gospider_version" != "$gospider_release" ]]; then
+            GO111MODULE=on go install github.com/jaeles-project/gospider@latest
+        else
+            echo -e "\n${YELLOW}[!] Gospider is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] Gospider does not exist ${NC}"
+    fi
+}
+
+#install ffuf
+i_ffuf() {
+    installtool_banner "FFuF"
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Content/ffuf
+    go install github.com/ffuf/ffuf/v2@latest
+}
+
+#update ffuf
+u_ffuf() {
+    updatetool_banner "FFuF"
+    if [[ -e "/usr/bin/ffuf" ]]; then
+        ffuf_release=$(cat /tmp/ffufr)
+        ffuf_version="v"$(cat /tmp/ffufv)
+        if [[ "$ffuf_version" != "$ffuf_release" ]]; then
+            go install github.com/ffuf/ffuf/v2@latest
+        else
+            echo -e "\n${YELLOW}[!] FFuF is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] FFuF does not exist ${NC}"
+    fi
+}
+
+#install katana
+i_katana() {
+    installtool_banner "Katana"
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Content/katana
+    go install github.com/projectdiscovery/katana/cmd/katana@latest
+}
+
+#update katana
+u_katana() {
+    updatetool_banner "Katana"
+    if [[ -e "/usr/bin/katana" ]]; then
+        katana_release=$(cat /tmp/katanar)
+        katana_version=$(cat /tmp/katanav)
+        if [[ "$katana_version" != "$katana_release" ]]; then
+            go install github.com/projectdiscovery/katana/cmd/katana@latest
+        else
+            echo -e "\n${YELLOW}[!] Katana is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] Katana does not exist ${NC}"
+    fi    
+}
+
+#installing Content Discovery Tools
+install_contentdiscoverytools() {
+    install_banner "Content Discovery Tools"
+    i_gospider
+    i_ffuf
+    i_katana
+}
+
+#updating Content Discovery Tools
+update_contentdiscoverytools() {
+    update_banner "Content Discovery Tools"
+    u_gospider
+    u_ffuf
+    u_katana
+}
+# ------------------------------------------</CONTENT DISCOVERY TOOLS >--------------------------------------------
+
+# --------------------------------------------< DNS DISCOVERY TOOLS >----------------------------------------------
+#install dnsx
+i_dnsx() {
+    installtool_banner "Dnsx"
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Dns/dnsx
+    go install -v github.com/projectdiscovery/dnsx/cmd/dnsx@latest
+}
+
+#update dnsx
+u_dnsx() {
+    updatetool_banner "Dnsx"
+    if [[ -e "/usr/bin/dnsx" ]]; then
+        dnsx_release=$(cat /tmp/dnsxr)
+        dnsx_version="v"$(cat /tmp/dnsxv)
+        if [[ "$dnsx_version" != "$dnsx_release" ]]; then
+            go install -v github.com/projectdiscovery/dnsx/cmd/dnsx@latest
+        else
+            echo -e "\n${YELLOW}[!] Dnsx is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] Dnsx does not exist ${NC}"
+    fi 
+}
+
+#installing DNS Discovery Tools
+install_dnsdiscoverytools() {
+    install_banner "DNS Discovery Tools"
+    i_dnsx
+}
+
+#updating DNS Discovery Tools
+update_dnsdiscoverytools() {
+    update_banner "DNS Discovery Tools"
+    u_dnsx
+}
+# --------------------------------------------</DNS DISCOVERY TOOLS >----------------------------------------------
+
+# -------------------------------------------< PARAM DISCOVERY TOOLS >---------------------------------------------
+#install paramspider
+i_paramspider() {
+    installtool_banner "ParamSpider"
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Params
+    cd ${HOME}/Hunt/Tools/Recon/Params
+    git clone https://github.com/devanshbatham/ParamSpider
+    cd ${HOME}/Hunt/Tools/Recon/Params/ParamSpider
+    if [[ "${release}" == "arch" || "${release}" == "debian" ]]; then 
+        pip3 install -r requirements.txt --break-system-packages
+    else
+        pip3 install -r requirements.txt
+    fi
+    bash -c 'touch /usr/bin/paramspider && chmod +x /usr/bin/paramspider && echo "python3 ~/Hunt/Tools/Recon/Params/ParamSpider/paramspider.py \"\$@\"" > /usr/bin/paramspider'
+}
+
+#update paramspider
+u_paramspider() {
+    updatetool_banner "ParamSpider"
+        if [[ -e "/usr/bin/paramspider" ]]; then
+            paramspider_release=$(cat /tmp/paramspiderr)
+            paramspider_version="1.0"
+            if [[ "$paramspider_version" != "$paramspider_release" ]]; then
+                cd ${HOME}/Hunt/Tools/Recon/Params
+                git pull
+                cd ${HOME}/Hunt/Tools/Recon/Params/ParamSpider
+                    if [[ "${release}" == "arch" || "${release}" == "debian" ]] ; then 
+                        pip3 install -r requirements.txt --break-system-packages
+                    else
+                        pip3 install -r requirements.txt
+                    fi
+            else
+                echo -e "\n${YELLOW}[!] ParamSpider is update ${NC}"
+            fi
+    else
+        echo -e "\n${RED}[!] ParamSpider does not exist ${NC}"
+    fi 
+}
+
+#installing Params Discovery Tools
+install_paramsdiscoverytools() {
+    install_banner "Params Discovery Tools"
+    i_paramspider
+}
+
+#updating Params Discovery Tools
+update_paramsdiscoverytools() {
+    update_banner "Params Discovery Tools"
+    u_paramspider
+}
+# -------------------------------------------</PARAM DISCOVERY TOOLS >---------------------------------------------
+
+# --------------------------------------------< BUG DISCOVERY TOOLS >----------------------------------------------
+#install nuclei
+i_nuclei() {
+    installtool_banner "Nuclei"
+    mkdir -p ${HOME}/Hunt/Tools/Bugs/Nuclei
+    go install -v github.com/projectdiscovery/nuclei/v2/cmd/nuclei@latest
+}
+
+#update nuclei
+u_nuclei() {
+    updatetool_banner "Nuclei"
+    if [[ -e "/usr/bin/nuclei" ]]; then
+        nuclei_release=$(cat /tmp/nucleir)
+        nuclei_version=$(cat /tmp/nucleiv)
+        if [[ "$nuclei_version" != "$nuclei_release" ]]; then
+            go install -v github.com/projectdiscovery/nuclei/v2/cmd/nuclei@latest
+        else
+            echo -e "\n${YELLOW}[!] Nuclei is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] Nuclei does not exist ${NC}"
+    fi 
+}
+
+#installing Bug Discovery Tools
+install_bugdiscoverytools() {
+    install_banner "Bug Discovery Tools"
+    i_nuclei
+}
+
+#updating Bug Discovery Tools
+update_bugdiscoverytools() {
+    update_banner "Bug Discovery Tools"
+    u_nuclei
+}
+# --------------------------------------------</BUG DISCOVERY TOOLS >----------------------------------------------
+
+# --------------------------------------------< CDN DISCOVERY TOOLS >----------------------------------------------
+#install cutcdn
+i_cutcdn() {
+    installtool_banner "Cut-CDN"
+    mkdir -p ${HOME}/Hunt/Tools/CDN
+    go install github.com/ImAyrix/cut-cdn@latest
+}
+
+#update cutcdn
+u_cutcdn() {
+    updatetool_banner "Cut-CDN"
+    if [[ -e "/usr/bin/cut-cdn" ]]; then
+        cutcdn_release=$(cat /tmp/cutcdnr)
+        cutcdn_version=$(cat /tmp/cutcdnv)
+        if [[ "$cutcdn_version" != "$cutcdn_release" ]]; then
+            go install github.com/ImAyrix/cut-cdn@latest
+        else
+                echo -e "\n${YELLOW}[!] Cut-CDN is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] Cut-CDN does not exist ${NC}"
+    fi
+}
+
+#installing CDN Discovery Tools
+install_cdndiscoverytools() {
+    install_banner "CDN Tools"
+    i_cutcdn
+}
+
+#updating CDN Discovery Tools
+update_cdndiscoverytools() {
+    update_banner "CDN Tools"
+    u_cutcdn
+}
+# --------------------------------------------</CDN DISCOVERY TOOLS >----------------------------------------------
+
+# ----------------------------------------------< GITHUB CONFIG >--------------------------------------------------
+#git ignore
+gitignor() {
+    if [[ -e "${HOME}/Hunt/.git" ]]; then
+        echo -e ".vscode/ \nWordLists/SecLists/ \nWordLists/resolvers/ \nTools/Recon/Params/ParamSpider/ \nSetup/.webhook \n" | tee ${HOME}/Hunt/.gitignore > /dev/null
+    fi
+}
+
+#git clone Hunt
+gitclone_Hunt() {
+    install_banner "git clone Hunt"
+    cd ${HOME}
+    if [[ -e "${HOME}/Hunt" ]]; then
+        cd ${HOME}/Hunt && git pull
+    else
+        git clone https://github.com/zi-gax/Hunt.git
+    fi
+}
+
+#update Hunt
+update_Hunt() {
+    updatetool_banner "Hunt(Github)"
+    if [[ -e "${HOME}/Hunt" ]]; then
+        hunt_release=$(cat /tmp/huntr)
+        hunt_version=$(cat /tmp/huntv)
+        if [[ "$hunt_version" != "$hunt_release" ]]; then
+            cd ${HOME}/Hunt && git pull
+        else
+            echo -e "\n${YELLOW}[!] Hunt is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] Hunt does not exist ${NC}"
+    fi
+}
+
+#updating Github Repository
+update_github() {
+    update_banner "Github Repository"
+    update_Hunt
+    update_wordlist
+}
+
+#creating folders
+create_folder() {
+    config_banner "Hunt Folder"
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Dns
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Params
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Subdomain
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Content
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Port
+    mkdir -p ${HOME}/Hunt/Tools/CDN
+    mkdir -p ${HOME}/Hunt/Tools/Bugs
+    mkdir -p ${HOME}/Hunt/Tools/Bypass
+    mkdir -p ${HOME}/Hunt/WordLists
+    mkdir -p ${HOME}/Hunt/Project
+    mkdir -p ${HOME}/Hunt/BashProfile
+    mkdir -p ${HOME}/Hunt/Setup
+}
+# -----------------------------------------------</GITHUB CONFIG >-------------------------------------------------
+
+# -----------------------------------------------< CONFIG CODES >--------------------------------------------------
+#config bash profile
+bash_profile() {
+    config_banner "Bash Profile"
+    if [[ -e "${HOME}/Hunt/BashProfile/zhunt.prof" ]]; then
+        if ! grep -q "/Hunt/BashProfile/zhunt.prof" ${HOME}/.bashrc; then
+            echo "source "${HOME}/Hunt/BashProfile/zhunt.prof"" | tee -a ${HOME}/.zshrc ${HOME}/.bashrc ${HOME}/.bash_profile > /dev/null
+        fi
+        if ! grep -q "/Hunt/BashProfile/zprv.prof" ${HOME}/.bashrc; then
+            echo "source "${HOME}"/Hunt/BashProfile/zprv.prof" | tee -a ${HOME}/.zshrc ${HOME}/.bashrc ${HOME}/.bash_profile > /dev/null
+        fi
+    else
+        echo -e "\n${RED}[!] BashProfile does not exist ${NC}"
+    fi
+    if [[ -e "/usr/bin/zsh" ]]; then 
+        zsh -c 'source ${HOME}/.zshrc'
+        zsh -c 'source ${HOME}/.bashrc'
+        zsh -c 'source ${HOME}/.bash_profile'
+    else
+        source ${HOME}/.bashrc
+        source ${HOME}/.bash_profile
+    fi
+}
+
+#configing all go file
+config_tool() {
+    if [[ -e "${HOME}/go/bin" ]]; then
+        config_banner "Golang Tools (Copy To /usr/bin)"
+        cd ${HOME}/go/bin && cp * /usr/bin
+    fi
+}
+# -----------------------------------------------</CONFIG CODES >--------------------------------------------------
+
+# -----------------------------------------------< UPDTAE LISTS >--------------------------------------------------
+#update programming languages
+list_pl() {
+    echo -e "\n${BLUE}         ・Programming Languages・  ${NC}\n"
+    #go
+    if [[ -e "/usr/local/go/bin/go" ]]; then
+        go_release=$(curl --silent "https://go.dev/VERSION?m=text")
+        echo "$go_release" | tee /tmp/gor &> /dev/null
+        go version &> /tmp/go && awk '{print $3}' /tmp/go > /tmp/gov
+        go_version=$(cat /tmp/gov)
+        if [[ "$go_version" = "$go_release" ]]; then
+            echo -e "1-1| Go                 "${go_version}
+        else
+            if [[ -z "$go_release" ]]; then
+                echo -e "1-1| Go                 "${go_version}"    ""${RED}! Check Api"${NC}
+            else
+                echo -e "1-1| Go                 ""${DARK_GRAY}"${go_version}${NC}"    ""${GREEN}\xE2\x86\x91 "${go_release}${NC}
+            fi
+        fi
+    else
+        echo -e "1-1| Go                 ${RED}! Is Not Installed ${NC}"
+    fi
+}
+
+#update Subdomain Discovery Tools
+list_dt() {
+    echo -e "\n${BLUE}       ・Subdomain Discovery Tools・  ${NC}\n"
+
+    #subfinder
+    if [[ -e "/usr/bin/subfinder" ]]; then
+        subfinder_release=$(curl --silent "https://api.github.com/repos/projectdiscovery/subfinder/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "$subfinder_release" | tee /tmp/subfinderr &> /dev/null
+        subfinder -version &> /tmp/subfinder && awk '{print $4}' /tmp/subfinder > /tmp/subfinderv
+        subfinder_version=$(cat /tmp/subfinderv)
+        if [[ "$subfinder_version" = "$subfinder_release" ]]; then
+            echo -e "2-1| SubFinder	        "${subfinder_version}
+        else
+            if [[ -z "$subfinder_release" ]]; then
+                echo -e "2-1| SubFinder	        "${subfinder_version}"	    ""${RED}! Check Api"${NC}
+            else
+                echo -e "2-1| SubFinder	        "${DARK_GRAY}${subfinder_version}${NC}"	    ""${GREEN}\xE2\x86\x91 "${subfinder_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "2-1| SubFinder	        ${RED}! Is Not Installed ${NC}"
+    fi
+
+    #httpx
+    if [[ -e "/usr/bin/httpx" ]]; then
+        httpx_release=$(curl --silent "https://api.github.com/repos/projectdiscovery/httpx/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "$httpx_release" | tee /tmp/httpxr &> /dev/null
+        httpx --version &> /tmp/httpx && awk '{field=$4} END{print field}' /tmp/httpx > /tmp/httpxv
+        httpx_version=$(cat /tmp/httpxv)
+        if [[ "$httpx_version" = "$httpx_release" ]]; then
+            echo -e "2-2| httpx              "${httpx_version}
+        else
+            if [[ -z "$httpx_release" ]]; then
+                echo -e "2-2| httpx	        "${httpx_version}"	    ""${RED}! Check Api"${NC}
+            else
+                echo -e "2-2| httpx	        "${DARK_GRAY}${httpx_version}${NC}"	    ""${GREEN}\xE2\x86\x91 "${httpx_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "2-2| httpx	        ${RED}! Is Not Installed ${NC}"
+    fi
+
+    #amass
+    if [[ -e "/usr/bin/amass" ]]; then
+        amass_release=$(curl --silent "https://api.github.com/repos/owasp-amass/amass/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "$amass_release" | tee /tmp/amassr &> /dev/null
+        amass -version &> /tmp/amassv
+        amass_version=$(cat /tmp/amassv)
+        if [[ "$amass_version" = "$amass_release" ]]; then
+            echo -e "2-3| Amass	        "${amass_version}
+        else
+            if [[ -z "$amass_release" ]]; then
+                echo -e "2-3| Amass	        "${amass_version}"	    ""${RED}! Check Api"${NC}
+            else
+                echo -e "2-3| Amass	        "${DARK_GRAY}${amass_version}${NC}"	    ""${GREEN}\xE2\x86\x91 "${amass_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "2-3| Amass	        ${RED}! Is Not Installed ${NC}"
+    fi
+}
+
+#update Port Scanner Tools
+list_pst() {
+    echo -e "\n${BLUE}          ・Port Scanner Tools・	    ${NC}\n"
+    #naabu
+    if [[ -e "/usr/bin/naabu" ]]; then
+        naabu_release=$(curl --silent "https://api.github.com/repos/projectdiscovery/naabu/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "$naabu_release" | tee /tmp/naabur &> /dev/null
+        naabu --version &> /tmp/naabu && awk '{field=$4} END{print field}' /tmp/naabu > /tmp/naabuv
+        naabu_version="v"$(cat /tmp/naabuv)
+        if [[ "$naabu_version" = "$naabu_release" ]]; then
+            echo -e "3-1| Naabu	        "${naabu_version}
+        else
+            if [[ -z "$naabu_release" ]]; then
+                echo -e "3-1| Naabu	        "${naabu_version}"	    ""${RED}! Check Api"${NC}
+            else
+                echo -e "3-1| Naabu	        "${DARK_GRAY}${naabu_version}${NC}"	    ""${GREEN}\xE2\x86\x91 "${naabu_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "3-1| Naabu	        ${RED}! Is Not Installed ${NC}"
+    fi
+}
+
+#update Content Discovery Tools
+list_cdt() {
+    echo -e "\n${BLUE}        ・Content Discovery Tools・	    ${NC}\n"
+    #gospider
+    if [[ -e "/usr/bin/gospider" ]]; then
+        gospider_release=$(curl --silent "https://api.github.com/repos/jaeles-project/gospider/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "$gospider_release" | tee /tmp/gospiderr &> /dev/null
+        gospider --version &> /tmp/gospider && awk 'NR==1 {print $2}' /tmp/gospider > /tmp/gospiderv
+        gospider_version=$(cat /tmp/gospiderv)
+        if [[ "$gospider_version" = "$gospider_release" ]]; then
+            echo -e "4-1| GoSpider	        "${gospider_version}
+        else
+            if [[ -z "$gospider_release" ]]; then
+                echo -e "4-1| GoSpider	        "${gospider_version}"	    ""${RED}! Check Api"${NC}
+            else
+                echo -e "4-1| GoSpider	        "${DARK_GRAY}${gospider_version}${NC}"	    ""${GREEN}\xE2\x86\x91 "${gospider_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "4-1| GoSpider	        ${RED}! Is Not Installed ${NC}"
+    fi
+
+    #ffuf
+    if [[ -e "/usr/bin/ffuf" ]]; then
+        ffuf_release=$(curl --silent "https://api.github.com/repos/ffuf/ffuf/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "$ffuf_release" | tee /tmp/ffufr &> /dev/null
+        ffuf -V &> /tmp/ffuf && awk '{print $3}' /tmp/ffuf |cut -d'-' -f1 > /tmp/ffufv
+        ffuf_version="v"$(cat /tmp/ffufv)
+        if [[ "$ffuf_version" = "$ffuf_release" ]]; then
+            echo -e "4-2| FFuF	        "${ffuf_version}
+        else
+            if [[ -z "$ffuf_release" ]]; then
+                echo -e "4-2| FFuF	        "${ffuf_version}"	    ""${RED}! Check Api"${NC}
+            else
+                echo -e "4-2| FFuF	        "${DARK_GRAY}${ffuf_version}${NC}"	    ""${GREEN}\xE2\x86\x91 "${ffuf_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "4-2| FFuF	        ${RED}! Is Not Installed ${NC}"
+    fi
+
+    #katana
+    if [[ -e "/usr/bin/katana" ]]; then
+        katana_release=$(curl --silent "https://api.github.com/repos/projectdiscovery/katana/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "$katana_release" | tee /tmp/katanar &> /dev/null
+        katana --version &> /tmp/katana && awk '{field=$4} END{print field}' /tmp/katana > /tmp/katanav
+        katana_version=$(cat /tmp/katanav)
+        if [[ "$katana_version" = "$katana_release" ]]; then
+            echo -e "4-3| Katana	        "${katana_version}
+        else
+            if [[ -z "$katana_release" ]]; then
+                echo -e "4-3| Katana	        "${katana_version}"	    ""${RED}! Check Api"${NC}
+            else
+                echo -e "4-3| Katana	        "${DARK_GRAY}${katana_version}${NC}"	    ""${GREEN}\xE2\x86\x91 "${katana_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "4-3| Katana	        ${RED}! Is Not Installed ${NC}"
+    fi
+}
+
+#update DNS Discovery Tools
+list_ddt() {
+    echo -e "\n${BLUE}          ・DNS Discovery Tools・	    ${NC}\n"
+    #dnsx
+    if [[ -e "/usr/bin/dnsx" ]]; then
+        dnsx_release=$(curl --silent "https://api.github.com/repos/projectdiscovery/dnsx/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "$dnsx_release" | tee /tmp/dnsxr &> /dev/null
+        dnsx --version &> /tmp/dnsx && awk '{field=$4} END{print field}' /tmp/dnsx > /tmp/dnsxv
+        dnsx_version="v"$(cat /tmp/dnsxv)
+        if [[ "$dnsx_version" = "$dnsx_release" ]]; then
+            echo -e "5-1| Dnsx	        "${dnsx_version}
+        else
+            if [[ -z "$dnsx_release" ]]; then
+                echo -e "5-1| Dnsx	        "${dnsx_version}"	    ""${RED}! Check Api"${NC}
+            else
+                echo -e "5-1| Dnsx	        "${DARK_GRAY}${dnsx_version}${NC}"	    ""${GREEN}\xE2\x86\x91 "${dnsx_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "5-1| Dnsx	        ${RED}! Is Not Installed ${NC}"
+    fi
+}
+
+#update Params Discovery Tools
+list_pdt() {
+    echo -e "\n${BLUE}        ・Params Discovery Tools・	    ${NC}\n"
+    #paramspider
+    if [[ -e "/usr/bin/paramspider" ]]; then
+        paramspider_release=$(curl --silent "https://api.github.com/repos/devanshbatham/paramspider/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "$paramspider_release" | tee /tmp/paramspiderr &> /dev/null
+        paramspider_version="1.0"
+        if [[ "$paramspider_version" = "$paramspider_release" ]]; then
+            echo -e "6-1| Paramspider        ""v"${paramspider_version}
+        else
+            if [[ -z "$paramspider_release" ]]; then
+                echo -e "6-1| Paramspider        ""v"${paramspider_version}"	    ""${RED}! Check Api"${NC}
+            else
+                echo -e "6-1| Paramspider        ""${DARK_GRAY}v"${paramspider_version}${NC}"	    ""${GREEN}\xE2\x86\x91 v"${paramspider_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "6-1| Paramspider        ${RED}! Is Not Installed ${NC}"
+    fi
+}
+
+#update Bug Discovery Tools
+list_bdt() {
+    echo -e "\n${BLUE}         ・Bug Discovery Tools・	    ${NC}\n"
+    #nuclei
+    if [[ -e "/usr/bin/nuclei" ]]; then
+        nuclei_release=$(curl --silent "https://api.github.com/repos/projectdiscovery/nuclei/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "$nuclei_release" | tee /tmp/nucleir &> /dev/null
+        nuclei --version &> /tmp/nuclei && awk '{print $5}' /tmp/nuclei > /tmp/nucleiv
+        nuclei_version=$(cat /tmp/nucleiv)
+        if [[ "$nuclei_version" = "$nuclei_release" ]]; then
+            echo -e "7-1| Nuclei	        "${nuclei_version}
+        else
+            if [[ -z "$nuclei_release" ]]; then
+                echo -e "7-1| Nuclei	        "${nuclei_version}"	    ""${RED}! Check Api"${NC}
+            else    
+                echo -e "7-1| Nuclei	        "${DARK_GRAY}${nuclei_version}${NC}"	    ""${GREEN}\xE2\x86\x91 "${nuclei_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "7-1| Nuclei	        ${RED}! Is Not Installed ${NC}"
+    fi
+}
+
+#update CDN Discovery Tools
+list_cdndt() {
+    echo -e "\n${BLUE}         ・CDN Discovery Tools・	    ${NC}\n"
+    #cutcdn
+    if [[ -e "/usr/bin/cut-cdn" ]]; then
+        cutcdn_release=$(curl --silent "https://api.github.com/repos/ImAyrix/cut-cdn/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "${cutcdn_release}" | tee /tmp/cutcdnr &> /dev/null
+        cut-cdn -v &> /dev/null
+        cut-cdn -v &> /tmp/cutcdn && awk '{print $4}' /tmp/cutcdn > /tmp/cutcdnv
+        cutcdn_version=$(cat /tmp/cutcdnv)
+        if [[ "$cutcdn_version" = "$cutcdn_release" ]]; then
+            echo -e "8-1| Cut-CDN	        "${cutcdn_version}
+        else
+            if [[ -z "$cutcdn_release" ]]; then
+                echo -e "8-1| Cut-CDN	        "${cutcdn_version}"	    ""${RED}! Check Api"${NC}
+            else    
+                echo -e "8-1| Cut-CDN	        "${DARK_GRAY}${cutcdn_version}${NC}"	    ""${GREEN}\xE2\x86\x91 "${cutcdn_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "8-1| Cut-CDN	        ${RED}! Is Not Installed ${NC}"
+    fi
+}
+
+#update Github Repository 
+list_github() {
+    echo -e "\n${BLUE}          ・Github Repository・	    ${NC}\n"
+    #Hunt
+    if [[ -e "${HOME}/Hunt" ]]; then
+        hunt_release=$(curl --silent "https://api.github.com/repos/zi-gax/Hunt/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "${cutcdn_release}" | tee /tmp/huntr &> /dev/null
+        cd ${HOME}/Hunt && git tag > /tmp/huntv
+        hunt_version=$(cat /tmp/huntv)
+        if [[ "$hunt_version" = "$hunt_release" ]]; then
+            echo -e "9-1| Hunt	        "${hunt_version}
+        else
+            if [[ -z "$cutcdn_release" ]]; then
+                echo -e "8-1| Hunt	        "${hunt_version}"	    ""${RED}! Check Api"${NC}
+            else    
+                echo -e "8-1| Hunt	        "${DARK_GRAY}${hunt_version}${NC}"	    ""${GREEN}\xE2\x86\x91 "${hunt_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "9-1| Hunt	        ${RED}! Is Not Installed ${NC}"
+    fi
+
+    #wordlist
+    if [[ -e "${HOME}/Hunt/WordLists" ]]; then
+        echo -e "9-2| WordLists"
+    else
+        echo -e "9-2| WordLists	        ${RED}! Is Not Installed ${NC}"
+    fi
+}
+# -----------------------------------------------</UPDTAE LISTS >--------------------------------------------------
+
+# ----------------------------------------------< CONFIG SERVER >--------------------------------------------------
+config_server () {
+    dns_baks
+    config_tool
+    dns_google
+    update_linux
+    install_defaulttools
+    gitclone_Hunt
+    gitignor
+    discord_webhook
+    if [[ "$(which zsh)" != "/usr/bin/zsh" && "$(which zsh)" != "/usr/sbin/zsh" ]]; then
+        zigax_hbanner
+        echo -e "${DARK_GRAY}__________________________________________${NC}\n"
+        echo -e "${YELLOW}[?] Do you Want Install zsh + ohmyzsh ? (Y/n)${NC}"
+        read -N 1 opomz
+        if [[ "$opomz" = "y" || "$opomz" = "Y" || "$opomz" = "yes" ]]; then
+        install_omz
+        fi
+    fi
+    dns_default
+    zigax_hbanner
+    echo -e "${DARK_GRAY}__________________________________________${NC}\n"
+    echo -e "[1] All-Auto Configing \n[2] Manually Configing \n[3] Updating Tools\n[4] Change Dns Resolver"
+    read -N 1 option
+
+    # -------------------------------------------< ALL AUTO SCRIPT >
+    if [[ "$option" = "1" ]]; then
+
+        #auto config function
+        auto_function() {
+            auto_hbanner
+            echo -e "\n${YELLOW} ***" ${DATE} "*** ${NC}"
+            dns_Quad9
+            create_folder
+            bash_profile
+            install_go
+            install_wordlist
+            install_cdndiscoverytools
+            install_subdomaindiscoverytools
+            install_portscannertools
+            install_contentdiscoverytools
+            install_dnsdiscoverytools
+            install_paramsdiscoverytools
+            install_bugdiscoverytools
+            config_tool
+            dns_default
+            bauto_log
+        }
+        bash -c 'touch /var/log/AC-zi$(date +"-%B-%0d").log'
+        auto_function 2>&1 | bash -c 'tee /var/log/AC-zi$(date +"-%B-%0d").log'
+        error_check | bash -c 'tee -a /var/log/AC-zi$(date +"-%B-%0d").log'
+        #send notif discord webhook
+        JSON_PAYLOADAC='{
+          "content": null,
+          "embeds": [
+            {
+              "title": "All-Auto Configing Server Done !",
+              "description": "LogFile /var/log/AC-zi'"$(date +"-%B-%0d").log"'",
+              "color": 0,
+              "author": {
+                "name": "Server '"$(curl -s https://api.ipify.org)"'",
+                "url": "https://api.iplocation.net/?ip='"$(curl -s https://api.ipify.org)"'",
+                "icon_url": "https://github.com/zi-gax/zi-gax/assets/67065043/48833aa4-9616-4f21-b90f-27ad570ad056"
+              },
+              "footer": {
+              "text": "Created By Zi-Gax",
+              "icon_url": "https://avatars.githubusercontent.com/u/67065043?v=4"
+              },
+              "timestamp": "'"$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")"'"
+            }
+          ],
+          "username": "・Hunt (setup)・",
+          "avatar_url": "https://github.com/zi-gax/zi-gax/assets/67065043/354b9630-7b3d-4364-a605-866b884dd57f",
+          "attachments": []
+        }'
+        curl -s -X POST -H "Content-Type: multipart/form-data" -F "file=@/var/log/AC-zi$(date +"-%B-%0d").log" -F "payload_json=$JSON_PAYLOADAC" "${WEBHOOK_URL}" > /dev/null
+        exit 0
+    # -------------------------------------------</ALL AUTO SCRIPT >
+    
+    # -------------------------------------------< MANUALL SCRIPT >
+    elif [[ "$option" = "2" ]]; then
+        
+        #manually config function
+        manual_function() {
+            manual_hbanner
+            echo -e "\n${YELLOW} ***" ${DATE} "*** ${NC}"
+            dns_Quad9
+            create_folder
+            bash_profile
+            echo -e "${DARK_GRAY}__________________________________________${NC}\n"
+            echo -e "[1] install Go Last Version\n[2] Install Wordlists\n[3] Install Cdn Tools\n   ${DARK_GRAY}[3-1] Cut-CDN${NC} \n[4] Install Subdomain Discovery Tools\n   ${DARK_GRAY}[4-1] Subfinder${NC}\n   ${DARK_GRAY}[4-2] Httpx${NC}\n   ${DARK_GRAY}[4-3] Amass${NC}\n[5] Install Port Scanner Tools\n   ${DARK_GRAY}[5-1] Naabu${NC}\n[6] Install Content Discovery Tools\n   ${DARK_GRAY}[6-1] Gospider${NC}\n   ${DARK_GRAY}[6-2] FFuF${NC}\n   ${DARK_GRAY}[6-3] Katana${NC}\n[7] Install Dns Discovery Tools\n   ${DARK_GRAY}[7-1] Dnsx${NC}\n[8] Install Params Discovery Tools\n   ${DARK_GRAY}[8-1] Paramspider${NC}\n[9] Install Bug Discovery Tools\n   ${DARK_GRAY}[9-1] Nuclei${NC}"
+            read -p "Enter your choices (space-separated): " choices
+
+            #Convert the choices into an array
+            IFS=' ' read -ra choice_array <<< "$choices"
+
+            #Process each choice
+            for choice in "${choice_array[@]}"; do
+                case $choice in
+                    1)
+                    install_go
+                    ;;
+                    2)
+                    install_wordlist
+                    ;;
+                    3)
+                    install_cdndiscoverytools
+                    ;;
+                    3-1)
+                    i_cutcdn
+                    ;;
+                    4)
+                    install_subdomaindiscoverytools
+                    ;;
+                    4-1)
+                    i_subfinder
+                    ;;
+                    4-2)
+                    i_httpx
+                    ;;
+                    4-3)
+                    i_amass
+                    ;;
+                    5)
+                    install_portscannertools
+                    ;;
+                    5-1)
+                    i_naabu
+                    ;;
+                    6)
+                    install_contentdiscoverytools
+                    ;;
+                    6-1)
+                    i_gospider
+                    ;;
+                    6-2)
+                    i_ffuf
+                    ;;
+                    6-3)
+                    i_katana
+                    ;;
+                    7)
+                    install_dnsdiscoverytools
+                    ;;
+                    7-1)
+                    i_dnsx
+                    ;;
+                    8)
+                    install_paramsdiscoverytools
+                    ;;
+                    8-1)
+                    i_paramspider
+                    ;;
+                    9)
+                    install_bugdiscoverytools
+                    ;;
+                    9-1)
+                    i_nuclei
+                    ;;
+                    *)
+                    echo "Invalid choice: $choice"
+                    ;;
+                esac
+            done
+            config_tool
+            dns_default
+            bManual_log
+        }
+        bash -c 'touch /var/log/MC-zi$(date +"-%B-%0d").log'
+        manual_function 2>&1 | bash -c 'tee /var/log/MC-zi$(date +"-%B-%0d").log'
+        error_check | bash -c 'tee -a /var/log/MC-zi$(date +"-%B-%0d").log'
+        #send notif discord webhook
+        JSON_PAYLOADMC='{
+          "content": null,
+          "embeds": [
+            {
+              "title": "Manually Configing Server Done !",
+              "description": "LogFile /var/log/MC-zi'"$(date +"-%B-%0d").log"'",
+              "color": 0,
+              "author": {
+                "name": "Server '"$(curl -s https://api.ipify.org)"'",
+                "url": "https://api.iplocation.net/?ip='"$(curl -s https://api.ipify.org)"'",
+                "icon_url": "https://github.com/zi-gax/zi-gax/assets/67065043/48833aa4-9616-4f21-b90f-27ad570ad056"
+              },
+              "footer": {
+              "text": "Created By Zi-Gax",
+              "icon_url": "https://avatars.githubusercontent.com/u/67065043?v=4"
+              },
+              "timestamp": "'"$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")"'"
+            }
+          ],
+          "username": "・Hunt (setup)・",
+          "avatar_url": "https://github.com/zi-gax/zi-gax/assets/67065043/354b9630-7b3d-4364-a605-866b884dd57f",
+          "attachments": []
+        }'
+        curl -s -X POST -H "Content-Type: multipart/form-data" -F "file=@/var/log/MC-zi$(date +"-%B-%0d").log" -F "payload_json=$JSON_PAYLOADMC" "${WEBHOOK_URL}" > /dev/null
+    # -------------------------------------------</MANUALL SCRIPT >
+
+    # -------------------------------------------< UPDATING SCRIPT >
+    #updating tools
+    elif [[ "$option" = "3" ]]; then
+        
+        #update tools function
+        update_function() {
+            dns_Quad9
+            update_hbanner
+            echo -e "\n${YELLOW} ***" ${DATE} "*** ${NC}"
+            echo -e "${DARK_GRAY}___________________________________________${NC}\n"
+            #list
+            list_pl
+            #list tools
+            list_dt
+            list_pst
+            list_cdt
+            list_ddt
+            list_pdt
+            list_bdt
+            list_cdndt
+            list_github
+            echo -e ""
+            read -p "Enter your list (space-separated,Single Num Update Category, 0 update all): " choicesl
+
+            #Convert the choices into an array
+            IFS=' ' read -ra choicel_array <<< "$choicesl"
+
+            #Process each choice
+            for choicel in "${choicel_array[@]}"; do
+                case $choicel in
+                    0)
+                    update_programminglanguage
+                    update_subdomaindiscoverytools
+                    update_portscannertools
+                    update_contentdiscoverytools
+                    update_dnsdiscoverytools
+                    update_paramsdiscoverytools
+                    update_bugdiscoverytools
+                    update_cdndiscoverytools
+                    ;;
+                    1)
+                    update_programminglanguage
+                    ;;
+                    1-1)
+                    u_go
+                    ;;
+                    2)
+                    update_subdomaindiscoverytools
+                    ;;
+                    2-1)
+                    u_subfinder
+                    ;;
+                    2-2)
+                    u_httpx
+                    ;;
+                    2-3)
+                    u_amass
+                    ;;
+                    3)
+                    update_portscannertools
+                    ;;
+                    3-1)
+                    u_naabu
+                    ;;
+                    4)
+                    update_contentdiscoverytools
+                    ;;
+                    4-1)
+                    u_gospider
+                    ;;
+                    4-2)
+                    u_ffuf
+                    ;;
+                    4-3)
+                    u_katana
+                    ;;
+                    5)
+                    update_dnsdiscoverytools
+                    ;;
+                    5-1)
+                    u_dnsx
+                    ;;
+                    6)
+                    update_paramsdiscoverytools
+                    ;;
+                    6-1)
+                    u_paramspider
+                    ;;
+                    7)
+                    update_bugdiscoverytools
+                    ;;
+                    7-1)
+                    u_nuclei
+                    ;;
+                    8)
+                    update_cdndiscoverytools
+                    ;;
+                    8-1)
+                    u_cutcdn
+                    ;;
+                    9)
+                    update_github
+                    ;;
+                    9-1)
+                    update_Hunt
+                    ;;
+                    9-2)
+                    update_wordlist
+                    ;;
+                    *)
+                    echo "Invalid choice: $choicesl"
+                    echo -e "\n${RED}[!]Invalid choice: $choicesl ${NC}"
+                    error_check
+                    sleep 1
+                    clear -x
+                    config_server
+                    ;;
+                esac
+            done
+            dns_default
+            bUpdate_log
+        }
+        bash -c 'touch /var/log/UT-zi$(date +"-%B-%0d").log'
+        update_function 2>&1 | bash -c 'tee /var/log/UT-zi$(date +"-%B-%0d").log'
+        error_check | bash -c 'tee -a /var/log/UT-zi$(date +"-%B-%0d").log'
+        #send notif discord webhook
+        JSON_PAYLOADUT='{
+          "content": null,
+          "embeds": [
+            {
+              "title": "Updating Tools Done !",
+              "description": "LogFile /var/log/UT-zi'"$(date +"-%B-%0d").log"'",
+              "color": 0,
+              "author": {
+                "name": "Server '"$(curl -s https://api.ipify.org)"'",
+                "url": "https://api.iplocation.net/?ip='"$(curl -s https://api.ipify.org)"'",
+                "icon_url": "https://github.com/zi-gax/zi-gax/assets/67065043/48833aa4-9616-4f21-b90f-27ad570ad056"
+              },
+              "footer": {
+              "text": "Created By Zi-Gax",
+              "icon_url": "https://avatars.githubusercontent.com/u/67065043?v=4"
+              },
+              "timestamp": "'"$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")"'"
+            }
+          ],
+          "username": "・Hunt (setup)・",
+          "avatar_url": "https://github.com/zi-gax/zi-gax/assets/67065043/354b9630-7b3d-4364-a605-866b884dd57f",
+          "attachments": []
+        }'
+        curl -s -X POST -H "Content-Type: multipart/form-data" -F "file=@/var/log/UT-zi$(date +"-%B-%0d").log" -F "payload_json=$JSON_PAYLOADUT" "${WEBHOOK_URL}" > /dev/null 
+    # -------------------------------------------</UPDATING SCRIPT >
+
+    # -----------------------------------------< CHANGING DNS SCRIPT >
+    elif [[ "$option" = "4" ]]; then
+
+        #Changing Dns
+        changing_dns() {
+            dns_hbanner
+            echo -e "\n${YELLOW} ***" ${DATE} "*** ${NC}"
+            echo -e "${DARK_GRAY}__________________________________________${NC}\n"
+            echo -e "[1] Google     (8.8.8.8 ; 8.8.4.4) \n[2] Shekan     (178.22.122.100 ; 185.51.200.2) \n[3] Cloudflare (1.1.1.1 ; 1.0.0.1)\n[4] Quad9      (9.9.9.9 ; 149.112.112.112)"
+            read -N 1 optiond
+
+            case $optiond in
+                1)
+                    dns_google
+                    ;;
+                2)
+                    dns_shekan
+                    ;;
+                3)
+                    dns_cloud
+                    ;;
+                4)
+                    dns_Quad9
+                    ;;
+                *)
+                    echo -e "\n${RED}[!]Invalid option1! ${NC}"
+                    error_check
+                    sleep 2
+                    clear -x
+                    config_server
+                    ;;
+            esac
+        }
+        changing_dns
+    # -----------------------------------------</CHANGING DNS SCRIPT >
+    else
+        echo -e "\n${RED}[!]Invalid option! ${NC}"
+        error_check
+        sleep 1
+        clear -x
+        config_server
+    fi
+}
+# ----------------------------------------------</CONFIG SERVER >--------------------------------------------------
+
+# -----------------------------------------------< RUN SCRIPT >----------------------------------------------------
+#check arg in
+for arg in "$@"; do
+    if [ "$arg" == "-d" ]; then
+        debug
+        break
+    fi
+done
+#main code
+zigax_hbanner
+config_server 2>&1 | bash -c 'tee -a /var/log/Setup-zi$(date +"-%B-%0d").log'
+# -----------------------------------------------</RUN SCRIPT >----------------------------------------------------

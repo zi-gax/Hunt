@@ -1,0 +1,6 @@
+alias myip='ip=$(curl -s https://api.ipify.org)
+echo "My public IP address is: $ip"' 
+export PATH=$PATH:/usr/local/go/bin
+export PATH=$PATH:/root/go/bin
+export GOPROXY=https://goproxy.io
+export PATH="/usr/local/bin:$PATH"
