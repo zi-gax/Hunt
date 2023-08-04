@@ -40,6 +40,13 @@ git clone https://github.com/zi-gax/Hunt.git
 ```
 cd Hunt/Setup && chmod +x setup && sudo ./setup
 ```
+### Discord Webhook
+<p>Send notification to discord when stup finished.</p>
+<p>you can change webhook url in .webhook file in this path :</p>
+
+```
+Hunt/Setup/.webhook
+```
 
 ## Setup tools list
 

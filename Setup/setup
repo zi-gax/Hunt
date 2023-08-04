@@ -267,13 +267,13 @@ install_defaulttools() {
     install_banner "Default Tools"
     case "${release}" in
     fedora)
-        yum install -y -q which vim wget procps-ng powerline-fonts rust cargo curl libpcap-devel git net-tools tmux make gcc gcc-c++ python3 python3-pip python3-devel openssl rust-libudev-devel libudev-devel openssl-devel jq nano pkg-config ncurses which util-linux-ng util-linux-user
+        yum install -y -q which vim wget procps-ng powerline-fonts curl libpcap-devel git net-tools tmux make gcc gcc-c++ python3 python3-pip python3-devel openssl rust-libudev-devel libudev-devel openssl-devel jq nano pkg-config ncurses which util-linux-ng util-linux-user
         ;;
     arch)
-        pacman -S --noconfirm vim wget procps-ng powerline powerline-fonts rust curl libpcap git net-tools tmux base-devel make python python-pip openssl jq nano npm
+        pacman -S --noconfirm vim wget procps-ng powerline powerline-fonts curl libpcap git net-tools tmux base-devel make python python-pip openssl jq nano npm
         ;;
     *)
-        apt install -y -q vim wget fonts-powerline rustc cargo curl libpcap-dev git net-tools tmux build-essential make python3 python3-pip python3-apt python3-distutils libssl-dev pkg-config jq nano npm debianutils passwd
+        apt install -y -q vim wget fonts-powerline  curl libpcap-dev git net-tools tmux build-essential make python3 python3-pip python3-apt python3-distutils libssl-dev pkg-config jq nano npm debianutils passwd
         ;;
     esac
 }
@@ -339,9 +339,9 @@ dns_default() {
 # --------------------------------------------------</OS CONFIG >--------------------------------------------------
 
 # --------------------------------------------< PROGRAMMING LANGUAGE >---------------------------------------------
-#installing golang
-install_go() {
-    install_banner "Golang"
+#install golang
+i_go() {
+    installtool_banner "Golang"
     bash -c 'wget "https://go.dev/dl/$(curl https://go.dev/VERSION?m=text).linux-amd64.tar.gz"'
     bash -c 'rm -rf /usr/local/go /usr/bin/go && tar -C /usr/local -xzf $(curl https://go.dev/VERSION?m=text).linux-amd64.tar.gz'
     export PATH=$PATH:/usr/local/go/bin
@@ -350,14 +350,13 @@ install_go() {
     bash -c 'rm -rf $(curl https://go.dev/VERSION?m=text).linux-amd64.tar.gz'
 }
 
-#updating golang
+#update golang
 u_go() {
     updatetool_banner "Golang"
     if [[ -e "/usr/local/go/bin/go" ]]; then
         go_release=$(cat /tmp/gor)
         go_version=$(cat /tmp/gov)
         if [[ "$go_version" != "$go_release" ]]; then
-            dns_shekan
             bash -c 'wget "https://go.dev/dl/$(curl https://go.dev/VERSION?m=text).linux-amd64.tar.gz"'
             bash -c 'rm -rf /usr/local/go /usr/bin/go && tar -C /usr/local -xzf $(curl https://go.dev/VERSION?m=text).linux-amd64.tar.gz'
             export PATH=$PATH:/usr/local/go/bin
@@ -371,10 +370,48 @@ u_go() {
     fi
 }
 
+#install rust
+i_rust() {
+    installtool_banner "Rust"
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    if ! grep -q "source \"\$HOME/.cargo/env\"" ${HOME}/.bashrc; then
+        echo "source \"\$HOME/.cargo/env\"" | tee -a ${HOME}/.zshrc ${HOME}/.bashrc ${HOME}/.bash_profile > /dev/null
+    fi
+    if [[ -e "/usr/bin/zsh" ]]; then 
+        zsh -c 'source ${HOME}/.zshrc'
+        zsh -c 'source ${HOME}/.bashrc'
+        zsh -c 'source ${HOME}/.bash_profile'
+    else
+        source ${HOME}/.bashrc
+        source ${HOME}/.bash_profile
+    fi
+}
+
+#update rust
+u_rust() {
+    updatetool_banner "Rust"
+    if  command -v rustup &> /dev/null; then
+        if  rustc --version &> /dev/null; then
+            echo -e "\n${YELLOW}[!] Rust is update ${NC}"
+        else
+            echo -e "\n${RED}[!] Rust does not exist ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] Rust does not exist ${NC}"
+    fi
+}
+
+install_programminglanguage() {
+    install_banner "Programming Languages"
+    i_go
+    i_rust
+}
+
 #updating programming language
 update_programminglanguage() {
     update_banner "Programming Languages"
     u_go
+    u_rust
 }
 # --------------------------------------------</PROGRAMMING LANGUAGE >---------------------------------------------
 
@@ -892,6 +929,20 @@ list_pl() {
     else
         echo -e "1-1| Go                 ${RED}! Is Not Installed ${NC}"
     fi
+
+    #rust
+    if  command -v rustup &> /dev/null; then
+        if  rustc --version &> /dev/null; then
+            rustup update stable  &> /dev/null
+            rustc --version &> /tmp/rust && awk '{print $2}' /tmp/rust > /tmp/rustv
+            rust_version="v"$(cat /tmp/rustv)
+            echo -e "1-2| Rust               "${rust_version}
+        else
+            echo -e "1-2| Rust               ${RED}! Is Not Installed ${NC}"
+        fi
+    else
+        echo -e "1-2| Rust               ${RED}! Is Not Installed ${NC}"
+    fi
 }
 
 #update Subdomain Discovery Tools
@@ -1198,7 +1249,7 @@ config_server () {
             dns_Quad9
             create_folder
             bash_profile
-            install_go
+            install_programminglanguage
             install_wordlist
             install_cdndiscoverytools
             install_subdomaindiscoverytools
@@ -1253,7 +1304,7 @@ config_server () {
             create_folder
             bash_profile
             echo -e "${DARK_GRAY}__________________________________________${NC}\n"
-            echo -e "[1] install Go Last Version\n[2] Install Wordlists\n[3] Install Cdn Tools\n   ${DARK_GRAY}[3-1] Cut-CDN${NC} \n[4] Install Subdomain Discovery Tools\n   ${DARK_GRAY}[4-1] Subfinder${NC}\n   ${DARK_GRAY}[4-2] Httpx${NC}\n   ${DARK_GRAY}[4-3] Amass${NC}\n[5] Install Port Scanner Tools\n   ${DARK_GRAY}[5-1] Naabu${NC}\n[6] Install Content Discovery Tools\n   ${DARK_GRAY}[6-1] Gospider${NC}\n   ${DARK_GRAY}[6-2] FFuF${NC}\n   ${DARK_GRAY}[6-3] Katana${NC}\n[7] Install Dns Discovery Tools\n   ${DARK_GRAY}[7-1] Dnsx${NC}\n[8] Install Params Discovery Tools\n   ${DARK_GRAY}[8-1] Paramspider${NC}\n[9] Install Bug Discovery Tools\n   ${DARK_GRAY}[9-1] Nuclei${NC}"
+            echo -e "[1] Install Programming Language\n [1-1] install Go\n [1-2] install Rust\n [2] Install Wordlists\n[3] Install Cdn Tools\n   ${DARK_GRAY}[3-1] Cut-CDN${NC} \n[4] Install Subdomain Discovery Tools\n   ${DARK_GRAY}[4-1] Subfinder${NC}\n   ${DARK_GRAY}[4-2] Httpx${NC}\n   ${DARK_GRAY}[4-3] Amass${NC}\n[5] Install Port Scanner Tools\n   ${DARK_GRAY}[5-1] Naabu${NC}\n[6] Install Content Discovery Tools\n   ${DARK_GRAY}[6-1] Gospider${NC}\n   ${DARK_GRAY}[6-2] FFuF${NC}\n   ${DARK_GRAY}[6-3] Katana${NC}\n[7] Install Dns Discovery Tools\n   ${DARK_GRAY}[7-1] Dnsx${NC}\n[8] Install Params Discovery Tools\n   ${DARK_GRAY}[8-1] Paramspider${NC}\n[9] Install Bug Discovery Tools\n   ${DARK_GRAY}[9-1] Nuclei${NC}"
             read -p "Enter your choices (space-separated): " choices
 
             #Convert the choices into an array
@@ -1263,7 +1314,13 @@ config_server () {
             for choice in "${choice_array[@]}"; do
                 case $choice in
                     1)
-                    install_go
+                    install_programminglanguage
+                    ;;
+                    1-1)
+                    i_go
+                    ;;
+                    1-2)
+                    i_rust
                     ;;
                     2)
                     install_wordlist
@@ -1406,6 +1463,9 @@ config_server () {
                     ;;
                     1-1)
                     u_go
+                    ;;
+                    1-2)
+                    u_rust
                     ;;
                     2)
                     update_subdomaindiscoverytools
