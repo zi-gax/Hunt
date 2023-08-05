@@ -60,8 +60,8 @@ Hunt/Setup/.webhook
 ### Network scanner
 
 - [Naabu](https://github.com/projectdiscovery/naabu)
-- <s>[Masscan](https://github.com/robertdavidgraham/masscan)</s> (soon)
-- <s>[Nmap](https://nmap.org/)</s> (soon)
+- [Masscan](https://github.com/robertdavidgraham/masscan)
+- [Nmap](https://nmap.org/)</s>
 
 ### Content Discovery
 

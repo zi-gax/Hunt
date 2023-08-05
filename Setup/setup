@@ -267,7 +267,7 @@ install_defaulttools() {
     install_banner "Default Tools"
     case "${release}" in
     fedora)
-        yum install -y -q unzip which vim wget procps-ng powerline-fonts curl libpcap-devel git net-tools tmux make gcc gcc-c++ python3 python3-pip python3-devel openssl rust-libudev-devel libudev-devel openssl-devel jq nano pkg-config ncurses which util-linux-ng util-linux-user
+        yum install -y -q unzip which vim wget procps-ng powerline-fonts curl libpcap-devel git net-tools tmux cmake make gcc gcc-c++ python3 python3-pip python3-devel openssl rust-libudev-devel libudev-devel openssl-devel jq nano pkg-config ncurses which util-linux-ng util-linux-user
         ;;
     arch)
         pacman -S --noconfirm unzip vim wget procps-ng powerline powerline-fonts curl libpcap git net-tools tmux base-devel make python python-pip openssl jq nano npm
@@ -591,16 +591,69 @@ u_naabu() {
     fi
 }
 
+#install masscan
+i_masscan() {
+    installtool_banner "Masscan"
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Port/masscan
+    cd ${HOME}/Hunt/Tools/Recon/Port/masscan
+    git clone https://github.com/robertdavidgraham/masscan
+    cd masscan
+    make
+    make install
+    mv bin/masscan /usr/local/bin/
+}
+
+#update masscan
+u_masscan() {
+    updatetool_banner "Masscan"
+    if [[ -e "/usr/bin/masscan" ]]; then
+        masscan_release=$(cat /tmp/masscanr)
+        masscan_version=$(cat /tmp/masscanv)
+        if [[ "$masscan_version" != "$masscan_release" ]]; then
+            rm -rf mkdir -p ${HOME}/Hunt/Tools/Recon/Port/masscan /bin/masscan usr/bin/masscan /usr/local/bin/
+                mkdir -p ${HOME}/Hunt/Tools/Recon/Port/masscan
+                cd ${HOME}/Hunt/Tools/Recon/Port/masscan
+                git clone https://github.com/robertdavidgraham/masscan
+                cd masscan
+                make
+                make install
+                mv bin/masscan /usr/local/bin/
+        else
+            echo -e "\n${YELLOW}[!] Masscan is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] Masscan does not exist ${NC}"
+    fi    
+}
+
+i_nmap() {
+    installtool_banner "Nmap"
+    apt-get install nmap -y
+}
+
+u_nmap() {
+    updatetool_banner "Nmap"
+    if [[ -e "/usr/bin/nmap" ]]; then
+        echo -e "\n${YELLOW}[!] Nmap is update ${NC}"
+    else
+        echo -e "\n${RED}[!] Nmap does not exist ${NC}"
+    fi
+}
+
 #installing Port Scanner Tools
 install_portscannertools() {
     install_banner "Port Scanner Tools"
     i_naabu
+    i_masscan
+    i_nmap
 }
 
 #updating Port Scanner Tools
 update_portscannertools() {
     update_banner "Port Scanner Tools"
     u_naabu
+    u_masscan
+    u_nmap
 }
 # --------------------------------------------</PORT SCANNER TOOLS >-----------------------------------------------
 
@@ -1087,6 +1140,34 @@ list_pst() {
     else
         echo -e "3-1| Naabu	        ${RED}! Is Not Installed ${NC}"
     fi
+
+    #masscan
+    if [[ -e "/usr/bin/masscan" ]]; then
+        masscan_release=$(curl --silent "https://api.github.com/repos/robertdavidgraham/masscan/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "$masscan_release" | tee /tmp/masscanr &> /dev/null
+        masscan --version &> /tmp/masscan || awk 'NR==2 {print $3}' /tmp/masscan > /tmp/masscanv
+        masscan_version=$(cat /tmp/masscanv)
+        if [[ "$masscan_version" = "$masscan_release" ]]; then
+            echo -e "3-2| Masscan	        ""v"${masscan_version}
+        else
+            if [[ -z "$masscan_release" ]]; then
+                echo -e "3-2| Masscan	        ""v"${masscan_version}"	    ""${RED}! Check Api"${NC}
+            else
+                echo -e "3-2| Masscan	        "${DARK_GRAY}"v"${masscan_version}${NC}"	    ""${GREEN}\xE2\x86\x91 ""v"${masscan_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "3-2| masscan	        ${RED}! Is Not Installed ${NC}"
+    fi
+
+    #nmap
+    if [[ -e "/usr/bin/nmap" ]]; then
+        nmap --version &> /tmp/nmap && awk 'NR==1 {print $3}' /tmp/nmap > /tmp/nmapv
+        nmap_version=$(cat /tmp/nmapv)
+        echo -e "3-3| Nmap	        ""v"${nmap_version}
+    else
+        echo -e "3-3| Nmap	        ${RED}! Is Not Installed ${NC}"
+    fi
 }
 
 #update Content Discovery Tools
@@ -1363,7 +1444,7 @@ config_server () {
             create_folder
             bash_profile
             echo -e "${DARK_GRAY}__________________________________________${NC}\n"
-            echo -e "[1] Install Programming Language\n   ${DARK_GRAY}[1-1] install Go${NC}\n   ${DARK_GRAY}[1-2] install Rust${NC}\n[2] Install Wordlists\n[3] Install Cdn Tools\n   ${DARK_GRAY}[3-1] Cut-CDN${NC} \n[4] Install Subdomain Discovery Tools\n   ${DARK_GRAY}[4-1] Subfinder${NC}\n   ${DARK_GRAY}[4-2] Httpx${NC}\n   ${DARK_GRAY}[4-3] Amass${NC}\n   ${DARK_GRAY}[4-4] Findomain${NC}[5] Install Port Scanner Tools\n   ${DARK_GRAY}[5-1] Naabu${NC}\n[6] Install Content Discovery Tools\n   ${DARK_GRAY}[6-1] Gospider${NC}\n   ${DARK_GRAY}[6-2] FFuF${NC}\n   ${DARK_GRAY}[6-3] Katana${NC}\n[7] Install Dns Discovery Tools\n   ${DARK_GRAY}[7-1] Dnsx${NC}\n[8] Install Params Discovery Tools\n   ${DARK_GRAY}[8-1] Paramspider${NC}\n[9] Install Bug Discovery Tools\n   ${DARK_GRAY}[9-1] Nuclei${NC}"
+            echo -e "[1] Install Programming Language\n   ${DARK_GRAY}[1-1] install Go${NC}\n   ${DARK_GRAY}[1-2] install Rust${NC}\n[2] Install Wordlists\n[3] Install Cdn Tools\n   ${DARK_GRAY}[3-1] Cut-CDN${NC} \n[4] Install Subdomain Discovery Tools\n   ${DARK_GRAY}[4-1] Subfinder${NC}\n   ${DARK_GRAY}[4-2] Httpx${NC}\n   ${DARK_GRAY}[4-3] Amass${NC}\n   ${DARK_GRAY}[4-4] Findomain${NC}\n[5] Install Port Scanner Tools\n   ${DARK_GRAY}[5-1] Naabu${NC}\n   ${DARK_GRAY}[5-2] Masscan${NC}\n   ${DARK_GRAY}[5-3] Nmap${NC}\n[6] Install Content Discovery Tools\n   ${DARK_GRAY}[6-1] Gospider${NC}\n   ${DARK_GRAY}[6-2] FFuF${NC}\n   ${DARK_GRAY}[6-3] Katana${NC}\n[7] Install Dns Discovery Tools\n   ${DARK_GRAY}[7-1] Dnsx${NC}\n[8] Install Params Discovery Tools\n   ${DARK_GRAY}[8-1] Paramspider${NC}\n[9] Install Bug Discovery Tools\n   ${DARK_GRAY}[9-1] Nuclei${NC}"
             read -p "Enter your choices (space-separated): " choices
 
             #Convert the choices into an array
@@ -1410,6 +1491,12 @@ config_server () {
                     ;;
                     5-1)
                     i_naabu
+                    ;;
+                    5-2)
+                    i_masscan
+                    ;;
+                    5-3)
+                    i_nmap
                     ;;
                     6)
                     install_contentdiscoverytools
@@ -1550,6 +1637,12 @@ config_server () {
                     ;;
                     3-1)
                     u_naabu
+                    ;;
+                    3-2)
+                    u_masscan
+                    ;;
+                    3-3)
+                    u_nmap
                     ;;
                     4)
                     update_contentdiscoverytools
