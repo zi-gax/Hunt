@@ -727,12 +727,107 @@ u_katana() {
     fi    
 }
 
+#install waybackurls
+i_waybackurls() {
+    installtool_banner "Waybackurls"
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Content/waybackurls
+    go install github.com/tomnomnom/waybackurls@latest
+}
+
+#update waybackurls
+u_waybackurls() {
+    updatetool_banner "Waybackurls"
+    if [[ -e "/usr/bin/waybackurls" ]]; then
+        waybackurls_release=$(cat /tmp/waybackurlsr)
+        waybackurls_version=$(cat /tmp/waybackurlsv)
+        if [[ "$waybackurls_version" != "$waybackurls_release" ]]; then
+            go install github.com/tomnomnom/waybackurls@latest
+        else
+            echo -e "\n${YELLOW}[!] Waybackurls is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] Waybackurls does not exist ${NC}"
+    fi    
+}
+
+#install kiterunner
+i_kiterunner() {
+    installtool_banner "Kiterunner"
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Content/Kiterunner
+    cd ${HOME}/Hunt/Tools/Recon/Content/Kiterunner
+    kitever=$(curl --silent "https://api.github.com/repos/assetnote/kiterunner/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+    kiterunnerver="${kitever//v/}"
+    case "$(hardware_name)" in
+        amd64)
+        wget install https://github.com/assetnote/kiterunner/releases/download/v"$kiterunnerver"/kiterunner_"$kiterunnerver"_linux_amd64.tar.gz
+        tar xvf kiterunner_"$kiterunnerver"_linux_amd64.tar.gz
+        rm -rf kiterunner_"$kiterunnerver"_linux_amd64.tar.gz
+        ;;
+        arm64)
+        wget install https://github.com/assetnote/kiterunner/releases/download/v"$kiterunnerver"/kiterunner_"$kiterunnerver"_linux_arm64.tar.gz
+        tar xvf kiterunner_"$kiterunnerver"_linux_arm64.tar.gz
+        rm -rf kiterunner_"$kiterunnerver"_linux_arm64.tar.gz
+        ;;
+    esac
+    mv kr /usr/local/bin
+    mkdir -p wordlists
+    cd wordlists
+    wget install https://wordlists-cdn.assetnote.io/data/kiterunner/routes-large.kite.tar.gz
+    wget install https://wordlists-cdn.assetnote.io/data/kiterunner/routes-small.kite.tar.gz 
+    tar xf routes-large.kite.tar.gz
+    rm -rf routes-large.kite.tar.gz
+    tar xf routes-small.kite.tar.gz
+    rm -rf routes-small.kite.tar.gz
+}
+
+#update kiterunner
+u_kiterunner() {
+    updatetool_banner "Kiterunner"
+    if [[ -e "/usr/local/bin/kr" ]]; then
+        kiterunner_release=$(cat /tmp/kiterunnerr)
+        kiterunner_version="v"$(cat /tmp/kiterunnerv)
+        if [[ "$kiterunner_version" != "$kiterunner_release" ]]; then
+            rm -rf /usr/local/bin/kr ${HOME}/Hunt/Tools/Recon/Content/Kiterunner
+            mkdir -p ${HOME}/Hunt/Tools/Recon/Content/Kiterunner
+            cd ${HOME}/Hunt/Tools/Recon/Content/Kiterunner
+            kiterunnerver="${kiterunner_release//v/}"
+            case "$(hardware_name)" in
+                amd64)
+                wget install https://github.com/assetnote/kiterunner/releases/download/v"$kiterunnerver"/kiterunner_"$kiterunnerver"_linux_amd64.tar.gz
+                tar xvf kiterunner_"$kiterunnerver"_linux_amd64.tar.gz
+                rm -rf kiterunner_"$kiterunnerver"_linux_amd64.tar.gz
+                ;;
+                arm64)
+                wget install https://github.com/assetnote/kiterunner/releases/download/v"$kiterunnerver"/kiterunner_"$kiterunnerver"_linux_arm64.tar.gz
+                tar xvf kiterunner_"$kiterunnerver"_linux_arm64.tar.gz
+                rm -rf kiterunner_"$kiterunnerver"_linux_arm64.tar.gz
+                ;;
+            esac
+            mv kr /usr/local/bin
+            mkdir -p wordlists
+            cd wordlists
+            wget install https://wordlists-cdn.assetnote.io/data/kiterunner/routes-large.kite.tar.gz
+            wget install https://wordlists-cdn.assetnote.io/data/kiterunner/routes-small.kite.tar.gz 
+            tar xf routes-large.kite.tar.gz
+            rm -rf routes-large.kite.tar.gz
+            tar xf routes-small.kite.tar.gz
+            rm -rf routes-small.kite.tar.gz
+        else
+            echo -e "\n${YELLOW}[!] Kiterunner is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] Kiterunner does not exist ${NC}"
+    fi   
+}
+
 #installing Content Discovery Tools
 install_contentdiscoverytools() {
     install_banner "Content Discovery Tools"
     i_gospider
     i_ffuf
     i_katana
+    i_waybackurls
+    i_kiterunner
 }
 
 #updating Content Discovery Tools
@@ -741,6 +836,8 @@ update_contentdiscoverytools() {
     u_gospider
     u_ffuf
     u_katana
+    u_waybackurls
+    u_kiterunner
 }
 # ------------------------------------------</CONTENT DISCOVERY TOOLS >--------------------------------------------
 
@@ -1229,6 +1326,44 @@ list_cdt() {
     else
         echo -e "4-3| Katana	        ${RED}! Is Not Installed ${NC}"
     fi
+
+    #waybackurls
+    if [[ -e "/usr/bin/waybackurls" ]]; then
+        waybackurls_release=$(curl --silent "https://api.github.com/repos/tomnomnom/waybackurls/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "$waybackurls_release" | tee /tmp/waybackurlsr &> /dev/null
+        echo "v0.1.0"> /tmp/waybackurlsv
+        waybackurls_version=$(cat /tmp/waybackurlsv)
+        if [[ "$waybackurls_version" = "$waybackurls_release" ]]; then
+            echo -e "4-4| Waybackurls        "${waybackurls_version}
+        else
+            if [[ -z "$waybackurls_release" ]]; then
+                echo -e "4-4| Waybackurls        "${waybackurls_version}"	    ""${RED}! Check Api"${NC}
+            else
+                echo -e "4-4| Waybackurls        "${DARK_GRAY}${waybackurls_version}${NC}"	    ""${GREEN}\xE2\x86\x91 "${waybackurls_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "4-4| Waybackurls        ${RED}! Is Not Installed ${NC}"
+    fi
+
+    #kiterunner
+    if [[ -e "/usr/local/bin/kr" ]]; then
+        kiterunner_release=$(curl --silent "https://api.github.com/repos/assetnote/kiterunner/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "$kiterunner_release" | tee /tmp/kiterunnerr &> /dev/null
+        kr version &> /tmp/kiterunner && awk ' NR==16 {print $1}' /tmp/kiterunner > /tmp/kiterunnerv
+        kiterunner_version="v"$(cat /tmp/kiterunnerv)
+        if [[ "$kiterunner_version" = "$kiterunner_release" ]]; then
+            echo -e "4-4| Kiterunner         "${kiterunner_version}
+        else
+            if [[ -z "$kiterunner_release" ]]; then
+                echo -e "4-5| Kiterunner         "${kiterunner_version}"	    ""${RED}! Check Api"${NC}
+            else
+                echo -e "4-5| Kiterunner         "${DARK_GRAY}${kiterunner_version}${NC}"	    ""${GREEN}\xE2\x86\x91 "${kiterunner_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "4-5| Kiterunner         ${RED}! Is Not Installed ${NC}"
+    fi
 }
 
 #update DNS Discovery Tools
@@ -1444,7 +1579,7 @@ config_server () {
             create_folder
             bash_profile
             echo -e "${DARK_GRAY}__________________________________________${NC}\n"
-            echo -e "[1] Install Programming Language\n   ${DARK_GRAY}[1-1] install Go${NC}\n   ${DARK_GRAY}[1-2] install Rust${NC}\n[2] Install Wordlists\n[3] Install Cdn Tools\n   ${DARK_GRAY}[3-1] Cut-CDN${NC} \n[4] Install Subdomain Discovery Tools\n   ${DARK_GRAY}[4-1] Subfinder${NC}\n   ${DARK_GRAY}[4-2] Httpx${NC}\n   ${DARK_GRAY}[4-3] Amass${NC}\n   ${DARK_GRAY}[4-4] Findomain${NC}\n[5] Install Port Scanner Tools\n   ${DARK_GRAY}[5-1] Naabu${NC}\n   ${DARK_GRAY}[5-2] Masscan${NC}\n   ${DARK_GRAY}[5-3] Nmap${NC}\n[6] Install Content Discovery Tools\n   ${DARK_GRAY}[6-1] Gospider${NC}\n   ${DARK_GRAY}[6-2] FFuF${NC}\n   ${DARK_GRAY}[6-3] Katana${NC}\n[7] Install Dns Discovery Tools\n   ${DARK_GRAY}[7-1] Dnsx${NC}\n[8] Install Params Discovery Tools\n   ${DARK_GRAY}[8-1] Paramspider${NC}\n[9] Install Bug Discovery Tools\n   ${DARK_GRAY}[9-1] Nuclei${NC}"
+            echo -e "[1] Install Programming Language\n   ${DARK_GRAY}[1-1] install Go${NC}\n   ${DARK_GRAY}[1-2] install Rust${NC}\n[2] Install Wordlists\n[3] Install Cdn Tools\n   ${DARK_GRAY}[3-1] Cut-CDN${NC} \n[4] Install Subdomain Discovery Tools\n   ${DARK_GRAY}[4-1] Subfinder${NC}\n   ${DARK_GRAY}[4-2] Httpx${NC}\n   ${DARK_GRAY}[4-3] Amass${NC}\n   ${DARK_GRAY}[4-4] Findomain${NC}\n[5] Install Port Scanner Tools\n   ${DARK_GRAY}[5-1] Naabu${NC}\n   ${DARK_GRAY}[5-2] Masscan${NC}\n   ${DARK_GRAY}[5-3] Nmap${NC}\n[6] Install Content Discovery Tools\n   ${DARK_GRAY}[6-1] Gospider${NC}\n   ${DARK_GRAY}[6-2] FFuF${NC}\n   ${DARK_GRAY}[6-3] Katana${NC}\n   ${DARK_GRAY}[6-4] Waybackurls${NC}\n   ${DARK_GRAY}[6-5] Kiterunner${NC}\n[7] Install Dns Discovery Tools\n   ${DARK_GRAY}[7-1] Dnsx${NC}\n[8] Install Params Discovery Tools\n   ${DARK_GRAY}[8-1] Paramspider${NC}\n[9] Install Bug Discovery Tools\n   ${DARK_GRAY}[9-1] Nuclei${NC}"
             read -p "Enter your choices (space-separated): " choices
 
             #Convert the choices into an array
@@ -1509,6 +1644,12 @@ config_server () {
                     ;;
                     6-3)
                     i_katana
+                    ;;
+                    6-4)
+                    i_waybackurls
+                    ;;
+                    6-5)
+                    i_kiterunner
                     ;;
                     7)
                     install_dnsdiscoverytools
@@ -1655,6 +1796,12 @@ config_server () {
                     ;;
                     4-3)
                     u_katana
+                    ;;
+                    4-4)
+                    u_waybackurls
+                    ;;
+                    4-5)
+                    u_kiterunner
                     ;;
                     5)
                     update_dnsdiscoverytools

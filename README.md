@@ -68,8 +68,8 @@ Hunt/Setup/.webhook
 - [ffuf](https://github.com/ffuf/ffuf)
 - [Gospider](https://github.com/jaeles-project/gospider)
 - [Katana](https://github.com/projectdiscovery/katana)
-- <s>[waybackurls](https://github.com/tomnomnom/waybackurls)</s> (soon)
-- <s>[Kiterunner + API routes](https://github.com/assetnote/kiterunner)</s> (soon)
+- [waybackurls](https://github.com/tomnomnom/waybackurls)
+- [Kiterunner + API routes](https://github.com/assetnote/kiterunner)
 
 ### DNS Discovery
 
