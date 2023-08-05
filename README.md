@@ -55,7 +55,7 @@ Hunt/Setup/.webhook
 - [Subfinder](https://github.com/projectdiscovery/subfinder)
 - [Amass](https://github.com/OWASP/Amass)
 - [httpx](https://github.com/projectdiscovery/httpx)
-- <s>[Findomain](https://github.com/Findomain/Findomain)</s> (soon)
+- [Findomain](https://github.com/Findomain/Findomain)
 
 ### Network scanner
 
