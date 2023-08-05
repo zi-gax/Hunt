@@ -267,13 +267,13 @@ install_defaulttools() {
     install_banner "Default Tools"
     case "${release}" in
     fedora)
-        yum install -y -q which vim wget procps-ng powerline-fonts curl libpcap-devel git net-tools tmux make gcc gcc-c++ python3 python3-pip python3-devel openssl rust-libudev-devel libudev-devel openssl-devel jq nano pkg-config ncurses which util-linux-ng util-linux-user
+        yum install -y -q unzip which vim wget procps-ng powerline-fonts curl libpcap-devel git net-tools tmux make gcc gcc-c++ python3 python3-pip python3-devel openssl rust-libudev-devel libudev-devel openssl-devel jq nano pkg-config ncurses which util-linux-ng util-linux-user
         ;;
     arch)
-        pacman -S --noconfirm vim wget procps-ng powerline powerline-fonts curl libpcap git net-tools tmux base-devel make python python-pip openssl jq nano npm
+        pacman -S --noconfirm unzip vim wget procps-ng powerline powerline-fonts curl libpcap git net-tools tmux base-devel make python python-pip openssl jq nano npm
         ;;
     *)
-        apt install -y -q vim wget fonts-powerline  curl libpcap-dev git net-tools tmux build-essential make python3 python3-pip python3-apt python3-distutils libssl-dev pkg-config jq nano npm debianutils passwd
+        apt install -y -q unzip vim wget fonts-powerline  curl libpcap-dev git net-tools tmux build-essential make python3 python3-pip python3-apt python3-distutils libssl-dev pkg-config jq nano npm debianutils passwd
         ;;
     esac
 }
@@ -510,12 +510,51 @@ u_amass() {
     fi
 }
 
+#install findomain
+i_findomain(){
+    installtool_banner "Findomain"
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Subdomain/Findomain
+    cd ${HOME}/Hunt/Tools/Recon/Subdomain/Findomain
+    curl -LO https://github.com/findomain/findomain/releases/latest/download/findomain-linux-i386.zip 
+    unzip ${HOME}/Hunt/Tools/Recon/Subdomain/Findomain/findomain-linux-i386.zip 
+    rm -rf ${HOME}/Hunt/Tools/Recon/Subdomain/Findomain/findomain-linux-i386.zip
+    chmod +x findomain
+    cp findomain /usr/bin/
+    chmod +x /usr/bin/findomain
+}
+
+#update findomain
+u_findomain() {
+    updatetool_banner "Findomain"
+    if [[ -e "/usr/bin/findomain" ]]; then
+        findomain_release=$(cat /tmp/findomainr)
+        findomain_version=$(cat /tmp/findomainv)
+        if [[ "$findomain_version" != "$findomain_release" ]]; then
+            rm -rf ${HOME}/Hunt/Tools/Recon/Subdomain/Findomain 
+            rm -rf /usr/bin/findomain
+            mkdir -p ${HOME}/Hunt/Tools/Recon/Subdomain/Findomain
+            cd ${HOME}/Hunt/Tools/Recon/Subdomain/Findomain
+            curl -LO https://github.com/findomain/findomain/releases/latest/download/findomain-linux-i386.zip 
+            unzip ${HOME}/Hunt/Tools/Recon/Subdomain/Findomain/findomain-linux-i386.zip 
+            rm -rf ${HOME}/Hunt/Tools/Recon/Subdomain/Findomain/findomain-linux-i386.zip
+            chmod +x findomain
+            cp findomain /usr/bin/
+            chmod +x /usr/bin/findomain
+        else
+            echo -e "\n${YELLOW}[!] Findomain is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] Findomain does not exist ${NC}"
+    fi
+}
+
 #installing Subdomain Discovery Tools
 install_subdomaindiscoverytools() {
     install_banner "Subdomain Discovery Tools"
     i_subfinder
     i_httpx
-    i_amass 
+    i_amass
+    i_findomain 
 }
 
 #updating Subdomain Discovery Tools
@@ -523,7 +562,8 @@ update_subdomaindiscoverytools() {
     update_banner "Subdomain Discovery Tools"
     u_subfinder
     u_httpx
-    u_amass 
+    u_amass
+    u_findomain 
 }
 # --------------------------------------------</SUB DISCOVERY TOOLS >----------------------------------------------
 
@@ -1005,6 +1045,25 @@ list_dt() {
     else
         echo -e "2-3| Amass	        ${RED}! Is Not Installed ${NC}"
     fi
+
+    #findomain
+    if [[ -e "/usr/bin/findomain" ]]; then
+        findomain_release=$(curl --silent "https://api.github.com/repos/findomain/findomain/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "$findomain_release" | tee /tmp/findomainr &> /dev/null
+        findomain -V | awk '{print $2}' &> /tmp/findomainv
+        findomain_version=$(cat /tmp/findomainv)
+        if [[ "$findomain_version" = "$findomain_release" ]]; then
+            echo -e "2-4| Findomain	        ""v"${findomain_version}
+        else
+            if [[ -z "$amass_release" ]]; then
+                echo -e "2-4| Findomain	        ""v"${findomain_version}"	    ""${RED}! Check Api"${NC}
+            else
+                echo -e "2-4| Findomain	        "${DARK_GRAY}"v"${findomain_version}${NC}"	    ""${GREEN}\xE2\x86\x91 ""v"${findomain_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "2-4| Findomain	        ${RED}! Is Not Installed ${NC}"
+    fi
 }
 
 #update Port Scanner Tools
@@ -1189,13 +1248,13 @@ list_github() {
     #Hunt
     if [[ -e "${HOME}/Hunt" ]]; then
         hunt_release=$(curl --silent "https://api.github.com/repos/zi-gax/Hunt/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
-        echo "${cutcdn_release}" | tee /tmp/huntr &> /dev/null
+        echo "${hunt_release}" | tee /tmp/huntr &> /dev/null
         cd ${HOME}/Hunt && git tag > /tmp/huntv
         hunt_version=$(cat /tmp/huntv)
         if [[ "$hunt_version" = "$hunt_release" ]]; then
             echo -e "9-1| Hunt	        "${hunt_version}
         else
-            if [[ -z "$cutcdn_release" ]]; then
+            if [[ -z "$hunt_release" ]]; then
                 echo -e "8-1| Hunt	        "${hunt_version}"	    ""${RED}! Check Api"${NC}
             else    
                 echo -e "8-1| Hunt	        "${DARK_GRAY}${hunt_version}${NC}"	    ""${GREEN}\xE2\x86\x91 "${hunt_release}${NC}
@@ -1304,7 +1363,7 @@ config_server () {
             create_folder
             bash_profile
             echo -e "${DARK_GRAY}__________________________________________${NC}\n"
-            echo -e "[1] Install Programming Language\n [1-1] install Go\n [1-2] install Rust\n [2] Install Wordlists\n[3] Install Cdn Tools\n   ${DARK_GRAY}[3-1] Cut-CDN${NC} \n[4] Install Subdomain Discovery Tools\n   ${DARK_GRAY}[4-1] Subfinder${NC}\n   ${DARK_GRAY}[4-2] Httpx${NC}\n   ${DARK_GRAY}[4-3] Amass${NC}\n[5] Install Port Scanner Tools\n   ${DARK_GRAY}[5-1] Naabu${NC}\n[6] Install Content Discovery Tools\n   ${DARK_GRAY}[6-1] Gospider${NC}\n   ${DARK_GRAY}[6-2] FFuF${NC}\n   ${DARK_GRAY}[6-3] Katana${NC}\n[7] Install Dns Discovery Tools\n   ${DARK_GRAY}[7-1] Dnsx${NC}\n[8] Install Params Discovery Tools\n   ${DARK_GRAY}[8-1] Paramspider${NC}\n[9] Install Bug Discovery Tools\n   ${DARK_GRAY}[9-1] Nuclei${NC}"
+            echo -e "[1] Install Programming Language\n   ${DARK_GRAY}[1-1] install Go${NC}\n   ${DARK_GRAY}[1-2] install Rust${NC}\n[2] Install Wordlists\n[3] Install Cdn Tools\n   ${DARK_GRAY}[3-1] Cut-CDN${NC} \n[4] Install Subdomain Discovery Tools\n   ${DARK_GRAY}[4-1] Subfinder${NC}\n   ${DARK_GRAY}[4-2] Httpx${NC}\n   ${DARK_GRAY}[4-3] Amass${NC}\n   ${DARK_GRAY}[4-4] Findomain${NC}[5] Install Port Scanner Tools\n   ${DARK_GRAY}[5-1] Naabu${NC}\n[6] Install Content Discovery Tools\n   ${DARK_GRAY}[6-1] Gospider${NC}\n   ${DARK_GRAY}[6-2] FFuF${NC}\n   ${DARK_GRAY}[6-3] Katana${NC}\n[7] Install Dns Discovery Tools\n   ${DARK_GRAY}[7-1] Dnsx${NC}\n[8] Install Params Discovery Tools\n   ${DARK_GRAY}[8-1] Paramspider${NC}\n[9] Install Bug Discovery Tools\n   ${DARK_GRAY}[9-1] Nuclei${NC}"
             read -p "Enter your choices (space-separated): " choices
 
             #Convert the choices into an array
@@ -1342,6 +1401,9 @@ config_server () {
                     ;;
                     4-3)
                     i_amass
+                    ;;
+                    4-4)
+                    i_findomain
                     ;;
                     5)
                     install_portscannertools
@@ -1457,6 +1519,7 @@ config_server () {
                     update_paramsdiscoverytools
                     update_bugdiscoverytools
                     update_cdndiscoverytools
+                    update_github
                     ;;
                     1)
                     update_programminglanguage
@@ -1478,6 +1541,9 @@ config_server () {
                     ;;
                     2-3)
                     u_amass
+                    ;;
+                    2-4)
+                    u_findomain
                     ;;
                     3)
                     update_portscannertools
