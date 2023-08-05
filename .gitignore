@@ -1,5 +1,5 @@
 .vscode/ 
 WordLists/SecLists/ 
 WordLists/resolvers/ 
-Tools/Recon/Params/ParamSpider/ 
+Tools/Recon/ 
 Setup/.webhook 
