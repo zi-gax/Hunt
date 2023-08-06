@@ -81,7 +81,7 @@ Hunt/Setup/.webhook
 ### Params Discovery
 
 - [ParamSpider](https://github.com/devanshbatham/ParamSpider)
-- <s>[x8](https://github.com/jaeles-project/gospider)</s> (soon)
+- [x8](https://github.com/jaeles-project/gospider)
 
 
 ### Bug Discovery

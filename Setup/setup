@@ -374,6 +374,7 @@ u_go() {
 i_rust() {
     installtool_banner "Rust"
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    source \"\$HOME/.cargo/env\"
     if ! grep -q "source \"\$HOME/.cargo/env\"" ${HOME}/.bashrc; then
         echo "source \"\$HOME/.cargo/env\"" | tee -a ${HOME}/.zshrc ${HOME}/.bashrc ${HOME}/.bash_profile > /dev/null
     fi
@@ -1004,16 +1005,37 @@ u_paramspider() {
     fi 
 }
 
+#install x8
+i_x8() {
+    installtool_banner "x8"
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Params/x8
+    cargo install x8
+    cp ${HOME}/.cargo/bin/x8 /usr/bin
+}
+
+#update x8
+u_x8() {
+    updatetool_banner "x8"
+    if [[ -e "/usr/bin/x8" ]]; then
+        cargo install x8 &> /dev/null
+        echo -e "\n${YELLOW}[!] x8 is update ${NC}"
+    else
+        echo -e "\n${RED}[!] x8 does not exist ${NC}"
+    fi
+}
+
 #installing Params Discovery Tools
 install_paramsdiscoverytools() {
     install_banner "Params Discovery Tools"
     i_paramspider
+    i_x8
 }
 
 #updating Params Discovery Tools
 update_paramsdiscoverytools() {
     update_banner "Params Discovery Tools"
     u_paramspider
+    u_x8
 }
 # -------------------------------------------</PARAM DISCOVERY TOOLS >---------------------------------------------
 
@@ -1181,6 +1203,11 @@ config_tool() {
         config_banner "Golang Tools (Copy To /usr/bin)"
         cd ${HOME}/go/bin && cp * /usr/bin
     fi
+    if [[ -e "${HOME}/.cargo/bin" ]]; then
+        config_banner "Rust Tools (Copy To /usr/bin)"
+        cd ${HOME}/.cargo/bin && cp * /usr/bin
+    fi
+
 }
 # -----------------------------------------------</CONFIG CODES >--------------------------------------------------
 
@@ -1553,6 +1580,15 @@ list_pdt() {
     else
         echo -e "6-1| Paramspider        ${RED}! Is Not Installed ${NC}"
     fi
+
+    #x8
+    if [[ -e "/usr/bin/x8" ]]; then
+        x8 -V &> /tmp/x8 && awk '{print $2}' /tmp/x8 > /tmp/x8v
+        x8_version=$(cat /tmp/x8v)
+        echo -e "6-2| x8                 ""v"${x8_version}	
+    else
+        echo -e "6-2| x8                 ${RED}! Is Not Installed ${NC}"
+    fi
 }
 
 #update Bug Discovery Tools
@@ -1723,7 +1759,7 @@ config_server () {
             create_folder
             bash_profile
             echo -e "${DARK_GRAY}__________________________________________${NC}\n"
-            echo -e "[1] Install Programming Language\n   ${DARK_GRAY}[1-1] install Go${NC}\n   ${DARK_GRAY}[1-2] install Rust${NC}\n[2] Install Wordlists\n[3] Install Cdn Tools\n   ${DARK_GRAY}[3-1] Cut-CDN${NC} \n[4] Install Subdomain Discovery Tools\n   ${DARK_GRAY}[4-1] Subfinder${NC}\n   ${DARK_GRAY}[4-2] Httpx${NC}\n   ${DARK_GRAY}[4-3] Amass${NC}\n   ${DARK_GRAY}[4-4] Findomain${NC}\n[5] Install Port Scanner Tools\n   ${DARK_GRAY}[5-1] Naabu${NC}\n   ${DARK_GRAY}[5-2] Masscan${NC}\n   ${DARK_GRAY}[5-3] Nmap${NC}\n[6] Install Content Discovery Tools\n   ${DARK_GRAY}[6-1] Gospider${NC}\n   ${DARK_GRAY}[6-2] FFuF${NC}\n   ${DARK_GRAY}[6-3] Katana${NC}\n   ${DARK_GRAY}[6-4] Waybackurls${NC}\n   ${DARK_GRAY}[6-5] Kiterunner${NC}\n[7] Install Dns Discovery Tools\n   ${DARK_GRAY}[7-1] Dnsx${NC}\n   ${DARK_GRAY}[7-2] MassDNS${NC}\n   ${DARK_GRAY}[7-3] PureDNS${NC}\n   ${DARK_GRAY}[7-4] ShuffleDNS${NC}\n[8] Install Params Discovery Tools\n   ${DARK_GRAY}[8-1] Paramspider${NC}\n[9] Install Bug Discovery Tools\n   ${DARK_GRAY}[9-1] Nuclei${NC}"
+            echo -e "[1] Install Programming Language\n   ${DARK_GRAY}[1-1] install Go${NC}\n   ${DARK_GRAY}[1-2] install Rust${NC}\n[2] Install Wordlists\n[3] Install Cdn Tools\n   ${DARK_GRAY}[3-1] Cut-CDN${NC} \n[4] Install Subdomain Discovery Tools\n   ${DARK_GRAY}[4-1] Subfinder${NC}\n   ${DARK_GRAY}[4-2] Httpx${NC}\n   ${DARK_GRAY}[4-3] Amass${NC}\n   ${DARK_GRAY}[4-4] Findomain${NC}\n[5] Install Port Scanner Tools\n   ${DARK_GRAY}[5-1] Naabu${NC}\n   ${DARK_GRAY}[5-2] Masscan${NC}\n   ${DARK_GRAY}[5-3] Nmap${NC}\n[6] Install Content Discovery Tools\n   ${DARK_GRAY}[6-1] Gospider${NC}\n   ${DARK_GRAY}[6-2] FFuF${NC}\n   ${DARK_GRAY}[6-3] Katana${NC}\n   ${DARK_GRAY}[6-4] Waybackurls${NC}\n   ${DARK_GRAY}[6-5] Kiterunner${NC}\n[7] Install Dns Discovery Tools\n   ${DARK_GRAY}[7-1] Dnsx${NC}\n   ${DARK_GRAY}[7-2] MassDNS${NC}\n   ${DARK_GRAY}[7-3] PureDNS${NC}\n   ${DARK_GRAY}[7-4] ShuffleDNS${NC}\n[8] Install Params Discovery Tools\n   ${DARK_GRAY}[8-1] Paramspider${NC}\n   ${DARK_GRAY}[8-2] x8${NC}\n[9] Install Bug Discovery Tools\n   ${DARK_GRAY}[9-1] Nuclei${NC}"
             read -p "Enter your choices (space-separated): " choices
 
             #Convert the choices into an array
@@ -1815,6 +1851,9 @@ config_server () {
                     ;;
                     8-1)
                     i_paramspider
+                    ;;
+                    8-2)
+                    i_x8
                     ;;
                     9)
                     install_bugdiscoverytools
@@ -1976,6 +2015,9 @@ config_server () {
                     ;;
                     6-1)
                     u_paramspider
+                    ;;
+                    6-2)
+                    u_x8
                     ;;
                     7)
                     update_bugdiscoverytools
