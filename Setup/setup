@@ -1063,16 +1063,64 @@ u_nuclei() {
     fi 
 }
 
+#install sqlmap
+i_sqlmap() {
+    installtool_banner "Sqlmap"
+    cd ${HOME}/Hunt/Tools/Bugs
+    git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git sqlmap
+    bash -c 'touch /usr/bin/sqlmap && chmod +x /usr/bin/sqlmap && echo "python3 ~/Hunt/Tools/Bugs/sqlmap/sqlmap.py \"\$@\"" > /usr/bin/sqlmap'
+}
+
+#update sqlmap
+u_sqlmap() {
+    updatetool_banner "Sqlmap"
+    if [[ -e "/usr/bin/sqlmap" ]]; then
+        rm -rf ${HOME}/Hunt/Tools/Bugs/sqlmap
+        cd ${HOME}/Hunt/Tools/Bugs
+        git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git sqlmap &> /dev/null
+        echo -e "\n${YELLOW}[!] Sqlmap is update ${NC}" 
+    else
+        echo -e "\n${RED}[!] Sqlmap does not exist ${NC}"
+    fi 
+}
+
+#install nuclei
+i_dalfox() {
+    installtool_banner "Dalfox"
+    mkdir -p ${HOME}/Hunt/Tools/Bugs/dalfox
+    GO111MODULE=on go install -v github.com/hahwul/dalfox/v2@latest
+}
+
+#update dalfox
+u_dalfox() {
+    updatetool_banner "Dalfox"
+    if [[ -e "/usr/bin/dalfox" ]]; then
+        dalfox_release=$(cat /tmp/dalfoxr)
+        dalfox_version=$(cat /tmp/dalfoxv)
+        if [[ "$dalfox_version" != "$dalfox_release" ]]; then
+            GO111MODULE=on go install -v github.com/hahwul/dalfox/v2@latest
+        else
+            echo -e "\n${YELLOW}[!] Dalfox is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] Dalfox does not exist ${NC}"
+    fi 
+}
+
 #installing Bug Discovery Tools
 install_bugdiscoverytools() {
     install_banner "Bug Discovery Tools"
     i_nuclei
+    i_sqlmap
+    i_dalfox
 }
 
 #updating Bug Discovery Tools
 update_bugdiscoverytools() {
     update_banner "Bug Discovery Tools"
     u_nuclei
+    u_sqlmap
+    u_dalfox
 }
 # --------------------------------------------</BUG DISCOVERY TOOLS >----------------------------------------------
 
@@ -1612,6 +1660,34 @@ list_bdt() {
     else
         echo -e "7-1| Nuclei	        ${RED}! Is Not Installed ${NC}"
     fi
+
+    #sqlmap
+    if [[ -e "/usr/bin/sqlmap" ]]; then
+        sqlmap --version &> /tmp/sqlmap && awk -F '#' '{print $1}' /tmp/sqlmap > /tmp/sqlmapv
+        sqlmap_version=$(cat /tmp/sqlmapv)
+        echo -e "7-2| Sqlmap             ""v"${sqlmap_version}	
+    else
+        echo -e "7-2| Sqlmap             ${RED}! Is Not Installed ${NC}"
+    fi
+
+    #dalfox
+    if [[ -e "/usr/bin/dalfox" ]]; then
+        dalfox_release=$(curl --silent "https://api.github.com/repos/hahwul/dalfox/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "$dalfox_release" | tee /tmp/dalfoxr &> /dev/null
+        dalfox version &> /tmp/dalfox && awk '{field=$1} END{print field}' /tmp/dalfox | sed 's/\x1B\[93m//g; s/\x1B\[0m//g' | tr -d '\r\n' > /tmp/dalfoxv
+        dalfox_version=$(cat /tmp/dalfoxv)
+        if [[ "$dalfox_version" = "$dalfox_release" ]]; then
+            echo -e "7-3| Dalfox	        "${dalfox_version}
+        else
+            if [[ -z "$dalfox_release" ]]; then
+                echo -e "7-3| Dalfox	        "${dalfox_version}"	    ""${RED}! Check Api"${NC}
+            else    
+                echo -e "7-3| Dalfox	        "${DARK_GRAY}${dalfox_version}${NC}"	    ""${GREEN}\xE2\x86\x91 "${dalfox_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "7-3| Dalfox	        ${RED}! Is Not Installed ${NC}"
+    fi
 }
 
 #update CDN Discovery Tools
@@ -1759,7 +1835,7 @@ config_server () {
             create_folder
             bash_profile
             echo -e "${DARK_GRAY}__________________________________________${NC}\n"
-            echo -e "[1] Install Programming Language\n   ${DARK_GRAY}[1-1] install Go${NC}\n   ${DARK_GRAY}[1-2] install Rust${NC}\n[2] Install Wordlists\n[3] Install Cdn Tools\n   ${DARK_GRAY}[3-1] Cut-CDN${NC} \n[4] Install Subdomain Discovery Tools\n   ${DARK_GRAY}[4-1] Subfinder${NC}\n   ${DARK_GRAY}[4-2] Httpx${NC}\n   ${DARK_GRAY}[4-3] Amass${NC}\n   ${DARK_GRAY}[4-4] Findomain${NC}\n[5] Install Port Scanner Tools\n   ${DARK_GRAY}[5-1] Naabu${NC}\n   ${DARK_GRAY}[5-2] Masscan${NC}\n   ${DARK_GRAY}[5-3] Nmap${NC}\n[6] Install Content Discovery Tools\n   ${DARK_GRAY}[6-1] Gospider${NC}\n   ${DARK_GRAY}[6-2] FFuF${NC}\n   ${DARK_GRAY}[6-3] Katana${NC}\n   ${DARK_GRAY}[6-4] Waybackurls${NC}\n   ${DARK_GRAY}[6-5] Kiterunner${NC}\n[7] Install Dns Discovery Tools\n   ${DARK_GRAY}[7-1] Dnsx${NC}\n   ${DARK_GRAY}[7-2] MassDNS${NC}\n   ${DARK_GRAY}[7-3] PureDNS${NC}\n   ${DARK_GRAY}[7-4] ShuffleDNS${NC}\n[8] Install Params Discovery Tools\n   ${DARK_GRAY}[8-1] Paramspider${NC}\n   ${DARK_GRAY}[8-2] x8${NC}\n[9] Install Bug Discovery Tools\n   ${DARK_GRAY}[9-1] Nuclei${NC}"
+            echo -e "[1] Install Programming Language\n   ${DARK_GRAY}[1-1] install Go${NC}\n   ${DARK_GRAY}[1-2] install Rust${NC}\n[2] Install Wordlists\n[3] Install Cdn Tools\n   ${DARK_GRAY}[3-1] Cut-CDN${NC} \n[4] Install Subdomain Discovery Tools\n   ${DARK_GRAY}[4-1] Subfinder${NC}\n   ${DARK_GRAY}[4-2] Httpx${NC}\n   ${DARK_GRAY}[4-3] Amass${NC}\n   ${DARK_GRAY}[4-4] Findomain${NC}\n[5] Install Port Scanner Tools\n   ${DARK_GRAY}[5-1] Naabu${NC}\n   ${DARK_GRAY}[5-2] Masscan${NC}\n   ${DARK_GRAY}[5-3] Nmap${NC}\n[6] Install Content Discovery Tools\n   ${DARK_GRAY}[6-1] Gospider${NC}\n   ${DARK_GRAY}[6-2] FFuF${NC}\n   ${DARK_GRAY}[6-3] Katana${NC}\n   ${DARK_GRAY}[6-4] Waybackurls${NC}\n   ${DARK_GRAY}[6-5] Kiterunner${NC}\n[7] Install Dns Discovery Tools\n   ${DARK_GRAY}[7-1] Dnsx${NC}\n   ${DARK_GRAY}[7-2] MassDNS${NC}\n   ${DARK_GRAY}[7-3] PureDNS${NC}\n   ${DARK_GRAY}[7-4] ShuffleDNS${NC}\n[8] Install Params Discovery Tools\n   ${DARK_GRAY}[8-1] Paramspider${NC}\n   ${DARK_GRAY}[8-2] x8${NC}\n[9] Install Bug Discovery Tools\n   ${DARK_GRAY}[9-1] Nuclei${NC}\n   ${DARK_GRAY}[9-2] Sqlmap${NC}\n   ${DARK_GRAY}[9-3] Dalfox${NC}"
             read -p "Enter your choices (space-separated): " choices
 
             #Convert the choices into an array
@@ -1860,6 +1936,12 @@ config_server () {
                     ;;
                     9-1)
                     i_nuclei
+                    ;;
+                    9-2)
+                    i_sqlmap
+                    ;;
+                    9-3)
+                    i_dalfox
                     ;;
                     *)
                     echo "Invalid choice: $choice"
@@ -2024,6 +2106,12 @@ config_server () {
                     ;;
                     7-1)
                     u_nuclei
+                    ;;
+                    7-2)
+                    u_sqlmap
+                    ;;
+                    7-3)
+                    u_dalfox
                     ;;
                     8)
                     update_cdndiscoverytools

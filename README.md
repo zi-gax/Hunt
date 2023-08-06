@@ -87,9 +87,8 @@ Hunt/Setup/.webhook
 ### Bug Discovery
 
 - [Nuclei](https://github.com/projectdiscovery/nuclei)
-- <s>[SQLMap](https://github.com/sqlmapproject/sqlmap)</s> (soon)
-- <s>[Dalfox](https://github.com/hahwul/dalfox)</s> (soon)
-- <s>[WPscan](https://github.com/wpscanteam/wpscan)</s> (soon)
+- [SQLMap](https://github.com/sqlmapproject/sqlmap)
+- [Dalfox](https://github.com/hahwul/dalfox)
 
 ### CDN Discovery
 
@@ -104,4 +103,3 @@ Hunt/Setup/.webhook
 
 - [jq](https://github.com/stedolan/jq) 
 - [Tmux](https://github.com/tmux/tmux)
-- <s>[unfurl](https://github.com/tomnomnom/unfurl)</s> (soon)
