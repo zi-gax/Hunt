@@ -865,16 +865,103 @@ u_dnsx() {
     fi 
 }
 
+#install massdns
+i_massdns() {
+    installtool_banner "MassDNS"
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Dns/massdns
+    cd ${HOME}/Hunt/Tools/Recon/Dns/massdns
+    git clone https://github.com/blechschmidt/massdns.git
+    cd massdns
+    make
+    make install
+    cp ${HOME}/Hunt/Tools/Recon/Dns/massdns/massdns/bin/massdns /usr/local/bin/
+}
+
+#update massdns
+u_massdns() {
+    updatetool_banner "MassDNS"
+    if [[ -e "/usr/local/bin/massdns" ]]; then
+        massdns_release=$(cat /tmp/massdnsr)
+        massdns_version=$(cat /tmp/massdnsv)
+        if [[ "$massdns_version" != "$massdns_release" ]]; then
+            rm -rf ${HOME}/Hunt/Tools/Recon/Dns/massdns /usr/local/bin/massdns
+            mkdir -p ${HOME}/Hunt/Tools/Recon/Dns/massdns
+            cd ${HOME}/Hunt/Tools/Recon/Dns/massdns
+            git clone https://github.com/blechschmidt/massdns.git
+            cd massdns
+            make
+            make install
+            cp ${HOME}/Hunt/Tools/Recon/Dns/massdns/massdns/bin/massdns /usr/local/bin/
+        else
+            echo -e "\n${YELLOW}[!] MassDNS is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] MassDNS does not exist ${NC}"
+    fi 
+}
+
+#install puredns
+i_puredns() {
+    installtool_banner "PureDNS"
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Dns/puredns
+    GO111MODULE=on go install github.com/d3mondev/puredns/v2@latest
+}
+
+#update puredns
+u_puredns() {
+    updatetool_banner "PureDNS"
+    if [[ -e "/usr/bin/puredns" ]]; then
+        puredns_release=$(cat /tmp/purednsr)
+        puredns_version=$(cat /tmp/purednsv)
+        if [[ "$puredns_version" != "$puredns_release" ]]; then
+            GO111MODULE=on go install github.com/d3mondev/puredns/v2@latest
+        else
+            echo -e "\n${YELLOW}[!] PureDNS is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] PureDNS does not exist ${NC}"
+    fi 
+}
+
+#install shuffledns
+i_shuffledns() {
+    installtool_banner "ShuffleDNS"
+    mkdir -p ${HOME}/Hunt/Tools/Recon/Dns/shuffledns
+    go install -v github.com/projectdiscovery/shuffledns/cmd/shuffledns@latest
+}
+
+#update shuffledns
+u_shuffledns() {
+    updatetool_banner "ShuffleDNS"
+    if [[ -e "/usr/bin/shuffledns" ]]; then
+        shuffledns_release=$(cat /tmp/shufflednsr)
+        shuffledns_version=$(cat /tmp/shufflednsv)
+        if [[ "$shuffledns_version" != "$shuffledns_release" ]]; then
+            go install -v github.com/projectdiscovery/shuffledns/cmd/shuffledns@latest
+        else
+            echo -e "\n${YELLOW}[!] ShuffleDNS is update ${NC}"
+        fi
+    else
+        echo -e "\n${RED}[!] ShuffleDNS does not exist ${NC}"
+    fi 
+}
+
 #installing DNS Discovery Tools
 install_dnsdiscoverytools() {
     install_banner "DNS Discovery Tools"
     i_dnsx
+    i_massdns
+    i_puredns
+    i_shuffledns
 }
 
 #updating DNS Discovery Tools
 update_dnsdiscoverytools() {
     update_banner "DNS Discovery Tools"
     u_dnsx
+    u_massdns
+    u_puredns
+    u_shuffledns
 }
 # --------------------------------------------</DNS DISCOVERY TOOLS >----------------------------------------------
 
@@ -1387,6 +1474,63 @@ list_ddt() {
     else
         echo -e "5-1| Dnsx	        ${RED}! Is Not Installed ${NC}"
     fi
+
+    #massdns
+    if [[ -e "/usr/local/bin/massdns" ]]; then
+        massdns_release=$(curl --silent "https://api.github.com/repos/blechschmidt/massdns/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "$massdns_release" | tee /tmp/massdnsr &> /dev/null
+        massdns --version &> /tmp/massdns && awk '{print $2}' /tmp/massdns | awk -F '-' '{print $1}' > /tmp/massdnsv
+        massdns_version=$(cat /tmp/massdnsv)
+        if [[ "$massdns_version" = "$massdns_release" ]]; then
+            echo -e "5-2| MassDNS	        "${massdns_version}
+        else
+            if [[ -z "$massdns_release" ]]; then
+                echo -e "5-2| MassDNS	        "${massdns_version}"	    ""${RED}! Check Api"${NC}
+            else
+                echo -e "5-2| MassDNS	        "${DARK_GRAY}${massdns_version}${NC}"	    ""${GREEN}\xE2\x86\x91 "${massdns_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "5-2| MassDNS	        ${RED}! Is Not Installed ${NC}"
+    fi
+
+    #puredns
+    if [[ -e "/usr/bin/puredns" ]]; then
+        puredns_release=$(curl --silent "https://api.github.com/repos/d3mondev/puredns/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "$puredns_release" | tee /tmp/purednsr &> /dev/null
+        puredns --version &> /tmp/puredns && awk '{print $3}' /tmp/puredns > /tmp/purednsv
+        puredns_version=$(cat /tmp/purednsv)
+        if [[ "$puredns_version" = "$puredns_release" ]]; then
+            echo -e "5-1| PureDNS	        "${puredns_version}
+        else
+            if [[ -z "$puredns_release" ]]; then
+                echo -e "5-1| PureDNS	        "${puredns_version}"	    ""${RED}! Check Api"${NC}
+            else
+                echo -e "5-1| PureDNS	        "${DARK_GRAY}${puredns_version}${NC}"	    ""${GREEN}\xE2\x86\x91 "${puredns_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "5-1| PureDNS	        ${RED}! Is Not Installed ${NC}"
+    fi
+
+    #shuffledns
+    if [[ -e "/usr/bin/shuffledns" ]]; then
+        shuffledns_release=$(curl --silent "https://api.github.com/repos/projectdiscovery/shuffledns/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        echo "$shuffledns_release" | tee /tmp/shufflednsr &> /dev/null
+        shuffledns --version &> /tmp/shuffledns && awk '{field=$4} END{print field}' /tmp/shuffledns > /tmp/shufflednsv
+        shuffledns_version=$(cat /tmp/shufflednsv)
+        if [[ "$shuffledns_version" = "$shuffledns_release" ]]; then
+            echo -e "5-1| ShuffleDNS	        "${shuffledns_version}
+        else
+            if [[ -z "$shuffledns_release" ]]; then
+                echo -e "5-1| ShuffleDNS	        "${shuffledns_version}"	    ""${RED}! Check Api"${NC}
+            else
+                echo -e "5-1| ShuffleDNS	        "${DARK_GRAY}${shuffledns_version}${NC}"	    ""${GREEN}\xE2\x86\x91 "${shuffledns_release}${NC}
+            fi		
+        fi
+    else
+        echo -e "5-1| ShuffleDNS	        ${RED}! Is Not Installed ${NC}"
+    fi
 }
 
 #update Params Discovery Tools
@@ -1579,7 +1723,7 @@ config_server () {
             create_folder
             bash_profile
             echo -e "${DARK_GRAY}__________________________________________${NC}\n"
-            echo -e "[1] Install Programming Language\n   ${DARK_GRAY}[1-1] install Go${NC}\n   ${DARK_GRAY}[1-2] install Rust${NC}\n[2] Install Wordlists\n[3] Install Cdn Tools\n   ${DARK_GRAY}[3-1] Cut-CDN${NC} \n[4] Install Subdomain Discovery Tools\n   ${DARK_GRAY}[4-1] Subfinder${NC}\n   ${DARK_GRAY}[4-2] Httpx${NC}\n   ${DARK_GRAY}[4-3] Amass${NC}\n   ${DARK_GRAY}[4-4] Findomain${NC}\n[5] Install Port Scanner Tools\n   ${DARK_GRAY}[5-1] Naabu${NC}\n   ${DARK_GRAY}[5-2] Masscan${NC}\n   ${DARK_GRAY}[5-3] Nmap${NC}\n[6] Install Content Discovery Tools\n   ${DARK_GRAY}[6-1] Gospider${NC}\n   ${DARK_GRAY}[6-2] FFuF${NC}\n   ${DARK_GRAY}[6-3] Katana${NC}\n   ${DARK_GRAY}[6-4] Waybackurls${NC}\n   ${DARK_GRAY}[6-5] Kiterunner${NC}\n[7] Install Dns Discovery Tools\n   ${DARK_GRAY}[7-1] Dnsx${NC}\n[8] Install Params Discovery Tools\n   ${DARK_GRAY}[8-1] Paramspider${NC}\n[9] Install Bug Discovery Tools\n   ${DARK_GRAY}[9-1] Nuclei${NC}"
+            echo -e "[1] Install Programming Language\n   ${DARK_GRAY}[1-1] install Go${NC}\n   ${DARK_GRAY}[1-2] install Rust${NC}\n[2] Install Wordlists\n[3] Install Cdn Tools\n   ${DARK_GRAY}[3-1] Cut-CDN${NC} \n[4] Install Subdomain Discovery Tools\n   ${DARK_GRAY}[4-1] Subfinder${NC}\n   ${DARK_GRAY}[4-2] Httpx${NC}\n   ${DARK_GRAY}[4-3] Amass${NC}\n   ${DARK_GRAY}[4-4] Findomain${NC}\n[5] Install Port Scanner Tools\n   ${DARK_GRAY}[5-1] Naabu${NC}\n   ${DARK_GRAY}[5-2] Masscan${NC}\n   ${DARK_GRAY}[5-3] Nmap${NC}\n[6] Install Content Discovery Tools\n   ${DARK_GRAY}[6-1] Gospider${NC}\n   ${DARK_GRAY}[6-2] FFuF${NC}\n   ${DARK_GRAY}[6-3] Katana${NC}\n   ${DARK_GRAY}[6-4] Waybackurls${NC}\n   ${DARK_GRAY}[6-5] Kiterunner${NC}\n[7] Install Dns Discovery Tools\n   ${DARK_GRAY}[7-1] Dnsx${NC}\n   ${DARK_GRAY}[7-2] MassDNS${NC}\n   ${DARK_GRAY}[7-3] PureDNS${NC}\n   ${DARK_GRAY}[7-4] ShuffleDNS${NC}\n[8] Install Params Discovery Tools\n   ${DARK_GRAY}[8-1] Paramspider${NC}\n[9] Install Bug Discovery Tools\n   ${DARK_GRAY}[9-1] Nuclei${NC}"
             read -p "Enter your choices (space-separated): " choices
 
             #Convert the choices into an array
@@ -1656,6 +1800,15 @@ config_server () {
                     ;;
                     7-1)
                     i_dnsx
+                    ;;
+                    7-2)
+                    i_massdns
+                    ;;
+                    7-3)
+                    i_puredns
+                    ;;
+                    7-4)
+                    i_shuffledns
                     ;;
                     8)
                     install_paramsdiscoverytools
@@ -1808,6 +1961,15 @@ config_server () {
                     ;;
                     5-1)
                     u_dnsx
+                    ;;
+                    5-2)
+                    u_massdns
+                    ;;
+                    5-3)
+                    u_puredns
+                    ;;
+                    5-4)
+                    u_shuffledns
                     ;;
                     6)
                     update_paramsdiscoverytools

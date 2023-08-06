@@ -74,9 +74,9 @@ Hunt/Setup/.webhook
 ### DNS Discovery
 
 - [dnsx](https://github.com/projectdiscovery/dnsx)
-- <s>[MassDNS](https://github.com/blechschmidt/massdns)</s> (soon)
-- <s>[PureDNS](https://github.com/d3mondev/puredns)</s> (soon)
-- <s>[ShuffleDNS](https://github.com/projectdiscovery/shuffledns)</s> (soon)
+- [MassDNS](https://github.com/blechschmidt/massdns)
+- [PureDNS](https://github.com/d3mondev/puredns)
+- [ShuffleDNS](https://github.com/projectdiscovery/shuffledns)
   
 ### Params Discovery
 
