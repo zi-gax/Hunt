@@ -342,12 +342,12 @@ dns_default() {
 #install golang
 i_go() {
     installtool_banner "Golang"
-    bash -c 'wget "https://go.dev/dl/$(curl https://go.dev/VERSION?m=text).linux-amd64.tar.gz"'
-    bash -c 'rm -rf /usr/local/go /usr/bin/go && tar -C /usr/local -xzf $(curl https://go.dev/VERSION?m=text).linux-amd64.tar.gz'
+    bash -c 'wget "https://go.dev/dl/$(curl -s https://go.dev/VERSION?m=text | head -n 1).linux-amd64.tar.gz"'
+    bash -c 'rm -rf /usr/local/go /usr/bin/go && tar -C /usr/local -xzf $(curl -s https://go.dev/VERSION?m=text | head -n 1).linux-amd64.tar.gz'
     export PATH=$PATH:/usr/local/go/bin
     export GOPROXY=https://goproxy.io
     cp -r /usr/local/go /usr/bin/go
-    bash -c 'rm -rf $(curl https://go.dev/VERSION?m=text).linux-amd64.tar.gz'
+    bash -c 'rm -rf $(curl -s https://go.dev/VERSION?m=text | head -n 1).linux-amd64.tar.gz'
 }
 
 #update golang
@@ -357,11 +357,11 @@ u_go() {
         go_release=$(cat /tmp/gor)
         go_version=$(cat /tmp/gov)
         if [[ "$go_version" != "$go_release" ]]; then
-            bash -c 'wget "https://go.dev/dl/$(curl https://go.dev/VERSION?m=text).linux-amd64.tar.gz"'
-            bash -c 'rm -rf /usr/local/go /usr/bin/go && tar -C /usr/local -xzf $(curl https://go.dev/VERSION?m=text).linux-amd64.tar.gz'
+            bash -c 'wget "https://go.dev/dl/$(curl -s https://go.dev/VERSION?m=text | head -n 1).linux-amd64.tar.gz"'
+            bash -c 'rm -rf /usr/local/go /usr/bin/go && tar -C /usr/local -xzf $(curl -s https://go.dev/VERSION?m=text | head -n 1).linux-amd64.tar.gz'
             export PATH=$PATH:/usr/local/go/bin
             export GOPROXY=https://goproxy.io
-            bash -c 'rm -rf $(curl https://go.dev/VERSION?m=text).linux-amd64.tar.gz'
+            bash -c 'rm -rf $(curl -s https://go.dev/VERSION?m=text | head -n 1).linux-amd64.tar.gz'
         else
             echo -e "\n${YELLOW}[!] Golang is update ${NC}"
         fi
@@ -1265,7 +1265,7 @@ list_pl() {
     echo -e "\n${BLUE}         ・Programming Languages・  ${NC}\n"
     #go
     if [[ -e "/usr/local/go/bin/go" ]]; then
-        go_release=$(curl --silent "https://go.dev/VERSION?m=text")
+        go_release=$(curl -s https://go.dev/VERSION?m=text | head -n 1)
         echo "$go_release" | tee /tmp/gor &> /dev/null
         go version &> /tmp/go && awk '{print $3}' /tmp/go > /tmp/gov
         go_version=$(cat /tmp/gov)
