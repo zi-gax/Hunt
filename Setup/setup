@@ -1721,7 +1721,7 @@ list_github() {
     if [[ -e "${HOME}/Hunt" ]]; then
         hunt_release=$(curl --silent "https://api.github.com/repos/zi-gax/Hunt/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
         echo "${hunt_release}" | tee /tmp/huntr &> /dev/null
-        cd ${HOME}/Hunt && git tag > /tmp/huntv
+        cd ${HOME}/Hunt && git describe --tags --abbrev=0 > /tmp/huntv
         hunt_version=$(cat /tmp/huntv)
         if [[ "$hunt_version" = "$hunt_release" ]]; then
             echo -e "9-1| Hunt	        "${hunt_version}
