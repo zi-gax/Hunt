@@ -629,7 +629,17 @@ u_masscan() {
 
 i_nmap() {
     installtool_banner "Nmap"
-    apt-get install nmap -y
+    case "${release}" in
+    fedora)
+        yum install -y -q nmap
+        ;;
+    arch)
+        pacman -S --noconfirm nmap
+        ;;
+    *)
+        apt install -y -q nmap
+        ;;
+    esac
 }
 
 u_nmap() {
