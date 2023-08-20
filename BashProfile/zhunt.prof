@@ -83,11 +83,11 @@ get_subs () {
 }
 
 get_ip_asn () {
-	input=""
-	while read line
-	do
-		curl -s https://api.bgpview.io/ip/$line | jq -r ".data.prefixes[0].asn.asn"
-	done < "${1:-/dev/stdin}"
+    input=""
+    while read line
+    do
+        curl -s https://api.bgpview.io/ip/$line -H "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/116.0" | jq -r ".data.prefixes[0].asn.asn"
+    done < "${1:-/dev/stdin}"
 }
 
 get_asn_details () {
